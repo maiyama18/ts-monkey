@@ -1,4 +1,4 @@
-import hello from '../src';
+import { hello } from '../src';
 
 describe('hello()', () => {
   it('should say hello to empty target', () => {
