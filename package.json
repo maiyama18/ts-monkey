@@ -1,6 +1,6 @@
 {
   "name": "hello-npm-ymr",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "my hello world package",
   "main": "lib/index.js",
   "scripts": {
