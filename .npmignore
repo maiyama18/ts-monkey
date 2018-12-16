@@ -1,2 +1,6 @@
 src
+test
 tsconfig.json
+tslint.json
+.idea
+.vscode
