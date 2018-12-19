@@ -12,7 +12,7 @@ export class BlockStatement {
   public readonly token = new Token('LBRACE', '{');
   public statements: Statement[];
 
-  constructor(statements?: Statement[]) {
+  constructor(statements: Statement[]) {
     this.statements = statements || [];
   }
 
