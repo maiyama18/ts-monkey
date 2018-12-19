@@ -11,7 +11,7 @@ export type Expression =
     | FunctionLiteral
     | CallExpression;
 
-export type Operator = '+' | '-' | '*' | '/' | '==' | '!=' | '>' | '<';
+export type Operator = '+' | '-' | '*' | '/' | '!' | '==' | '!=' | '>' | '<';
 
 export type ParsePrefixFunc = () => Expression;
 export type ParseInfixFunc = (expression: Expression) => Expression;
