@@ -2,7 +2,7 @@ import { CallExpression, FunctionLiteral, IfExpression, InfixExpression, PrefixE
 import { Node, Program } from '../node/node';
 import { BlockStatement } from '../node/statements';
 import { Environment } from '../object/environment';
-import { Bool, Func, Int, Nil, Obj, RetVal } from '../object/object';
+import { Bool, Func, Int, Nil, Obj } from '../object/object';
 
 const TRUE = new Bool(true);
 const FALSE = new Bool(false);
@@ -38,15 +38,11 @@ export class Evaluator {
       case 'BLOCK_STATEMENT':
         return this.evalBlockStatement(node, env);
       case 'LET_STATEMENT':
-        const letValue = this.eval(node.expression, env);
-        env.set(node.identifier.name, letValue);
-        return letValue;
+        return env.set(node.identifier.name, this.eval(node.expression, env));
       case 'EXPRESSION_STATEMENT':
-        const expValue = this.eval(node.expression, env);
-        return expValue;
+        return this.eval(node.expression, env);
       case 'RETURN_STATEMENT':
-        const retValue = this.eval(node.expression, env);
-        throw new ReturnSignal(retValue);
+        throw new ReturnSignal(this.eval(node.expression, env));
 
       // expression
       case 'IDENTIFIER':
@@ -94,12 +90,11 @@ export class Evaluator {
     const { statements } = blockStatement;
 
     let evaluated: Obj = NIL;
-
     for (const statement of statements) {
       evaluated = this.eval(statement, env);
     }
 
-    return evaluated;
+    return evaluated || NIL;
   }
 
   private evalPrefixExpression(prefixExp: PrefixExpression, env: Environment): Obj {
