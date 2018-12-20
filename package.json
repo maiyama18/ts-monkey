@@ -1,6 +1,6 @@
 {
   "name": "ymonkey",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "typescript implementation of monkey-lang (https://interpreterbook.com/#the-monkey-programming-language)",
   "main": "lib/index.js",
   "scripts": {
