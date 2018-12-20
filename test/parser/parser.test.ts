@@ -1,7 +1,7 @@
 import { Lexer } from '../../src/lexer/lexer';
 import {
     BoolLiteral,
-    Expression, Identifier, IfExpression,
+    Expression, FunctionLiteral, Identifier, IfExpression,
     InfixExpression,
     IntLiteral,
     Operator,
@@ -240,8 +240,52 @@ describe('parser', () => {
             });
         });
 
-        // Todo functionのテスト追加
-        // Todo clojureのテスト追加
+        describe('function', () => {
+            it('should parse function', () => {
+                const input = `fn(x, y) { x + y; }`;
+                const { statements } = parseProgram(input);
+
+                expect(statements.length).toBe(1);
+
+                const expressionStatement = statements[0] as ExpressionStatement;
+
+                const funcLiteral = expressionStatement.expression as FunctionLiteral;
+
+                expect(funcLiteral.parameters[0].name).toBe('x');
+                expect(funcLiteral.parameters[1].name).toBe('y');
+
+                testInfixExpression(
+                    (((funcLiteral.body.statements[0]) as ExpressionStatement).expression),
+                    'x', '+', 'y',
+                );
+            });
+
+            it('should parse closure', () => {
+                const input = `fn (x) { return fn(y) { x + y; } }`;
+                const { statements } = parseProgram(input);
+
+                expect(statements.length).toBe(1);
+
+                const expressionStatement = statements[0] as ExpressionStatement;
+                const funcLiteral = expressionStatement.expression as FunctionLiteral;
+
+                expect(funcLiteral.parameters.length).toBe(1);
+                expect(funcLiteral.parameters[0].name).toBe('x');
+
+                expect(funcLiteral.body.statements.length).toBe(1);
+
+                const nextedExpressionStatement = funcLiteral.body.statements[0] as ExpressionStatement;
+                const closureLiteral = nextedExpressionStatement.expression as FunctionLiteral;
+
+                expect(closureLiteral.parameters.length).toBe(1);
+                expect(closureLiteral.parameters[0].name).toBe('y');
+
+                testInfixExpression(
+                    (((closureLiteral.body.statements[0]) as ExpressionStatement).expression),
+                    'x', '+', 'y',
+                );
+            });
+        });
     });
 
     describe('single statement', () => {

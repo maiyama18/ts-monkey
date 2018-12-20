@@ -1,7 +1,9 @@
 import { Evaluator } from '../../src/evaluator/evaluator';
 import { Lexer } from '../../src/lexer/lexer';
+import { IntLiteral } from '../../src/node/expressions';
+import { ExpressionStatement } from '../../src/node/statements';
 import { Environment } from '../../src/object/environment';
-import { Bool, Int, Obj } from '../../src/object/object';
+import { Bool, Func, Int, Obj } from '../../src/object/object';
 import { Parser } from '../../src/parser/parser';
 
 describe('evaluator', () => {
@@ -189,11 +191,78 @@ describe('evaluator', () => {
                 const actual = testEval(input) as Int;
                 expect(actual.value).toBe(expected);
             });
+
+            it('should generate top-level closure', () => {
+                const input = `let a = 5; let add = fn(x) { x + a; }; add;`;
+
+                const actual = testEval(input) as Func;
+                console.log(actual);
+                console.log(actual.env);
+                // expect(actual.value).toBe(expected);
+            });
+
+            it('should eval top-level closure', () => {
+                const input = `let a = 5; let add = fn(x) { x + a; }; add(3);`;
+                const expected = 8;
+
+                const actual = testEval(input) as Int;
+                expect(actual.value).toBe(expected);
+            });
+
+            it('should generate closure', () => {
+                const input = `
+let outer_two = 2;
+let new_two_generator = fn() { let two = 2; return fn() { return outer_two; } };
+let two_generator = new_two_generator()
+two_generator;
+`;
+
+                const generator = testEval(input) as Func;
+                expect(generator.parameters.length).toBe(0);
+                expect(generator.body.statements.length).toBe(1);
+                console.log(generator.env);
+            });
+
+            it('should generate nexted closure', () => {
+                const input = `
+let new_two_generator = fn() { let two = 2; return fn() { two; } };
+let two_generator = new_two_generator()
+two_generator;
+`;
+                const expected = 2;
+
+                const actual = testEval(input) as Func;
+                // console.log(actual);
+                // console.log(actual.body);
+                // console.log(actual.parameters);
+                // console.log(actual.env);
+                // console.log(actual.objType);
+                expect(((actual.env.get('two')) as Int).value).toBe(2);
+                expect(actual).toBe(expected);
+            });
+
+            it('should eval nexted closure', () => {
+                const input = `
+let new_two_generator = fn() { let two = 2; return fn() { two; } };
+let two_generator = new_two_generator()
+two_generator();
+`;
+                const expected = 2;
+
+                console.log(testEval(input));
+                const actual = testEval(input) as Int;
+                // console.log(actual);
+                // console.log(actual.body);
+                // console.log(actual.parameters);
+                // console.log(actual.env);
+                // console.log(actual.objType);
+                expect(actual.value).toBe(expected);
+            });
         });
 
         describe('if', () => {
             it('should eval if expressions for condition true', () => {
-                const input = `if (10 > 1) { 10; }`;
+                const input = `if (10 > 1) { return 10; }`;
                 const expected = 10;
 
                 const actual = testEval(input) as Int;
@@ -201,7 +270,7 @@ describe('evaluator', () => {
             });
 
             it('should eval if expressions for condition false', () => {
-                const input = `if (1 > 10) { 9; } else { 10; }`;
+                const input = `if (1 > 10) { return 9; } else { 10; }`;
                 const expected = 10;
 
                 const actual = testEval(input) as Int;

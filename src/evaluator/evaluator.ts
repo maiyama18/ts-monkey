@@ -187,14 +187,24 @@ export class Evaluator {
     const evaledFunc = this.eval(funcLiteral, env);
     if (evaledFunc.objType !== 'FUNC') { return NIL; }
 
-    const extendedEnv = env.extend();
-    for (let i = 0; i < args.length; i++) {
-      const name = evaledFunc.parameters[i].name;
-      const evaledArg = this.eval(args[i], env);
-
-      extendedEnv.set(name, evaledArg);
+    const evaledArgs = [];
+    for (const arg of args) {
+        const evaledArg = this.eval(arg, env);
+        evaledArgs.push(evaledArg);
     }
 
-    return this.eval(evaledFunc.body, extendedEnv);
+    const extendedEnv = evaledFunc.env.extend();
+    for (let i = 0; i < args.length; i++) {
+      const name = evaledFunc.parameters[i].name;
+
+      extendedEnv.set(name, evaledArgs[i]);
+    }
+
+    try {
+        return this.eval(evaledFunc.body, extendedEnv);
+    } catch (err) {
+        console.log('CAUGHT', err);
+        return err.obj;
+    }
   }
 }
