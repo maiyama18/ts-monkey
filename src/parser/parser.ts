@@ -189,15 +189,15 @@ export class Parser {
     private parseExpression(precedence: Precedence): Expression {
         const parsePrefix = this.parsePrefixFuncs[this.currentToken.type];
         if (parsePrefix === undefined) {
-            throw new ParseError(`parser has no function to parse prefix expression ${this.currentToken}`);
+            throw new ParseError(`parser has no function to parse prefix expression ${this.currentToken.literal}`);
         }
 
         let left = parsePrefix();
 
-        while (!this.isPeekTokenType('SEMICOLON') && precedence < this.peekTokenPrecedence()) {
+        while (precedence < this.peekTokenPrecedence()) {
             const parseInfix = this.parseInfixFuncs[this.peekToken.type];
             if (parseInfix === undefined) {
-                throw new ParseError(`parser has no function to parse infix expression ${this.peekToken}`);
+                throw new ParseError(`parser has no function to parse infix expression ${this.peekToken.literal}`);
             }
 
             this.nextToken();

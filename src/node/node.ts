@@ -1,5 +1,5 @@
-import { Statement } from './statements';
 import { Expression } from './expressions';
+import { Statement } from './statements';
 
 export class Program {
     public readonly nodeType = 'PROGRAM';
