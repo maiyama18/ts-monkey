@@ -17,6 +17,16 @@ export class RuntimeError implements Error {
   }
 }
 
+export class ReturnSignal implements Error {
+    public readonly name = 'ReturnSignal';
+    public readonly message = 'return signal';
+    public obj: Obj;
+
+    constructor(obj: Obj) {
+        this.obj = obj;
+    }
+}
+
 export class Evaluator {
   constructor() {}
 
@@ -36,7 +46,7 @@ export class Evaluator {
         return expValue;
       case 'RETURN_STATEMENT':
         const retValue = this.eval(node.expression, env);
-        return new RetVal(retValue);
+        throw new ReturnSignal(retValue);
 
       // expression
       case 'IDENTIFIER':
@@ -66,10 +76,14 @@ export class Evaluator {
     let evaluated: Obj = NIL;
 
     for (const statement of statements) {
-      evaluated = this.eval(statement, env);
-
-      if (evaluated !== null) {
-        if (evaluated.objType === 'RET_VAL') { return evaluated.value; }
+      try {
+        evaluated = this.eval(statement, env);
+      } catch (err) {
+        if (err instanceof RuntimeError) {
+          throw err;
+        } else if (err instanceof ReturnSignal) {
+          return err.obj;
+        }
       }
     }
 
@@ -83,10 +97,6 @@ export class Evaluator {
 
     for (const statement of statements) {
       evaluated = this.eval(statement, env);
-
-      if (evaluated !== null) {
-        if (evaluated.objType === 'RET_VAL') { return evaluated; }
-      }
     }
 
     return evaluated;

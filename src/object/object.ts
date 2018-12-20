@@ -2,6 +2,7 @@ import { Identifier } from '../node/expressions';
 import { BlockStatement } from '../node/statements';
 import { Environment } from './environment';
 
+
 export type Obj = Int | Bool | RetVal | Func | Nil;
 
 export class Int {
