@@ -2,11 +2,20 @@ import { CallExpression, FunctionLiteral, IfExpression, InfixExpression, PrefixE
 import { Node, Program } from '../node/node';
 import { BlockStatement } from '../node/statements';
 import { Environment } from '../object/environment';
-import { Bool, Err, Func, Int, Nil, Obj, RetVal } from '../object/object';
+import { Bool, Func, Int, Nil, Obj, RetVal } from '../object/object';
 
 const TRUE = new Bool(true);
 const FALSE = new Bool(false);
 const NIL = new Nil();
+
+export class RuntimeError implements Error {
+  public readonly name = 'RuntimeError';
+  public message: string;
+
+  constructor(message: string) {
+    this.message = message;
+  }
+}
 
 export class Evaluator {
   constructor() {}
@@ -20,23 +29,18 @@ export class Evaluator {
         return this.evalBlockStatement(node, env);
       case 'LET_STATEMENT':
         const letValue = this.eval(node.expression, env);
-        if (letValue.objType === 'ERR') { return letValue; }
         env.set(node.identifier.name, letValue);
         return letValue;
       case 'EXPRESSION_STATEMENT':
         const expValue = this.eval(node.expression, env);
-        if (expValue.objType === 'ERR') { return expValue; }
         return expValue;
       case 'RETURN_STATEMENT':
         const retValue = this.eval(node.expression, env);
-        if (retValue.objType === 'ERR') { return retValue; }
         return new RetVal(retValue);
 
       // expression
       case 'IDENTIFIER':
-        const identValue = env.get(node.name);
-        if (identValue.objType === 'ERR') { return identValue; }
-        return identValue;
+        return env.get(node.name);
       case 'INT_LITERAL':
         return new Int(node.value);
       case 'BOOL_LITERAL':
@@ -65,7 +69,6 @@ export class Evaluator {
       evaluated = this.eval(statement, env);
 
       if (evaluated !== null) {
-        if (evaluated.objType === 'ERR') { return evaluated; }
         if (evaluated.objType === 'RET_VAL') { return evaluated.value; }
       }
     }
@@ -82,7 +85,6 @@ export class Evaluator {
       evaluated = this.eval(statement, env);
 
       if (evaluated !== null) {
-        if (evaluated.objType === 'ERR') { return evaluated; }
         if (evaluated.objType === 'RET_VAL') { return evaluated; }
       }
     }
@@ -94,12 +96,10 @@ export class Evaluator {
     const { operator, right } = prefixExp;
     const evaledRight = this.eval(right, env);
 
-    if (evaledRight.objType === 'ERR') { return evaledRight; }
-
     switch (operator) {
       case '-':
         if (evaledRight.objType !== 'INT') {
-          return new Err(`invalid operator: ${operator}${evaledRight.objType}`);
+          throw new RuntimeError(`invalid operator: ${operator}${evaledRight.objType}`);
         }
         return new Int(-evaledRight.value);
       case '!':
@@ -115,11 +115,8 @@ export class Evaluator {
     const evaledLeft = this.eval(left, env);
     const evaledRight = this.eval(right, env);
 
-    if (evaledLeft.objType === 'ERR') { return evaledLeft; }
-    if (evaledRight.objType === 'ERR') { return evaledRight; }
-
     if (evaledLeft.objType !== evaledRight.objType) {
-      return new Err(`type mismatch: ${evaledLeft.objType} ${operator} ${evaledRight.objType}`);
+      throw new RuntimeError(`type mismatch: ${evaledLeft.objType} ${operator} ${evaledRight.objType}`);
     }
 
     switch (evaledLeft.objType) {
@@ -152,7 +149,7 @@ export class Evaluator {
         return left.value < right.value ? TRUE : FALSE;
     }
 
-    return new Err(`invalid operator: ${left.objType} ${operator} ${right.objType}`);
+    throw new RuntimeError(`invalid operator: ${left.objType} ${operator} ${right.objType}`);
   }
 
   private evalInfixBooleansExpression(operator: string, left: Bool, right: Bool): Obj {
@@ -163,24 +160,18 @@ export class Evaluator {
         return left.value !== right.value ? TRUE : FALSE;
     }
 
-    return new Err(`invalid operator: ${left.objType} ${operator} ${right.objType}`);
+    throw new RuntimeError(`invalid operator: ${left.objType} ${operator} ${right.objType}`);
   }
 
   private evalIfExpression(ifExp: IfExpression, env: Environment): Obj {
     const { condition, consequence, alternative } = ifExp;
     const evaledCondition = this.eval(condition, env);
 
-    if (evaledCondition.objType === 'ERR') { return evaledCondition; }
-
     if (evaledCondition === FALSE) {
       if (alternative === undefined) { return NIL; }
-      const evaledAlternative = this.eval(alternative, env);
-      if (evaledAlternative.objType === 'ERR') { return evaledAlternative; }
-      return evaledAlternative;
+      return this.eval(alternative, env);
     } else {
-      const evaledConsequence = this.eval(consequence, env);
-      if (evaledConsequence.objType === 'ERR') { return evaledConsequence; }
-      return evaledConsequence;
+      return this.eval(consequence, env);
     }
   }
 
@@ -195,7 +186,6 @@ export class Evaluator {
     for (let i = 0; i < args.length; i++) {
       const name = evaledFunc.parameters[i].name;
       const evaledArg = this.eval(args[i], env);
-      if (evaledArg.objType === 'ERR') { return evaledArg; }
 
       extendedEnv.set(name, evaledArg);
     }

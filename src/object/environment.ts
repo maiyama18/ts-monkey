@@ -1,4 +1,5 @@
-import { Err, Obj } from './object';
+import { RuntimeError } from '../evaluator/evaluator';
+import { Obj } from './object';
 
 export class Environment {
   public store: {[name: string]: Obj};
@@ -14,7 +15,9 @@ export class Environment {
       return this.store[name];
     }
 
-    return this.outer !== undefined ? this.outer.get(name) : new Err(`undefined identifier: ${name}`);
+    if (this.outer === undefined) { throw new RuntimeError(`undefined identifier: ${name}`); }
+
+    return this.outer.get(name);
   }
 
   public set(name: string, obj: Obj): Obj {

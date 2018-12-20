@@ -35,7 +35,7 @@ const infixPrecedences: { [type in TokenType]?: Precedence } = {
 };
 
 class ParseError implements Error {
-    public readonly name = 'Parse Error';
+    public readonly name = 'ParseError';
     public message: string;
 
     constructor(message: string) {

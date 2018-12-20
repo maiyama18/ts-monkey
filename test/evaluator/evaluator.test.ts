@@ -74,6 +74,11 @@ describe('evaluator', () => {
                 const actual = testEval(input) as Bool;
                 expect(actual.value).toBe(expected);
             });
+
+            it('should throw error for -[true]', () => {
+                const input = '-true;';
+                expect(() => testEval(input)).toThrowError(/invalid operator/);
+            });
         });
 
         describe('infix', () => {
@@ -147,6 +152,16 @@ describe('evaluator', () => {
 
                 const actual = testEval(input) as Bool;
                 expect(actual.value).toBe(expected);
+            });
+
+            it('should throw error for [int] + [bool]', () => {
+                const input = '2 + true;';
+                expect(() => testEval(input)).toThrowError(`type mismatch`);
+            });
+
+            it('should throw error for [bool] + [bool]', () => {
+                const input = 'false + true;';
+                expect(() => testEval(input)).toThrowError(`invalid operator`);
             });
         });
 
@@ -269,6 +284,11 @@ describe('evaluator', () => {
 
                 const actual = testEval(input) as Int;
                 expect(actual.value).toBe(expected);
+            });
+
+            it('should throw error for undefined identifier', () => {
+                const input = `let a = 10; b;`;
+                expect(() => testEval(input)).toThrowError(`undefined identifier`);
             });
         });
     });

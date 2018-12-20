@@ -2,7 +2,7 @@ import { Identifier } from '../node/expressions';
 import { BlockStatement } from '../node/statements';
 import { Environment } from './environment';
 
-export type Obj = Int | Bool | RetVal | Err | Func | Nil;
+export type Obj = Int | Bool | RetVal | Func | Nil;
 
 export class Int {
     public readonly objType = 'INT';
@@ -57,19 +57,6 @@ export class Func {
 
     public inspect(): string {
         return `fn(${this.parameters.map((p) => p.name).join(', ')}) { ${this.body.string()} }`;
-    }
-}
-
-export class Err {
-    public readonly objType = 'ERR';
-    public message: string;
-
-    constructor(message: string) {
-        this.message = message;
-    }
-
-    public inspect(): string {
-        return `ERROR: ${this.message}`;
     }
 }
 
