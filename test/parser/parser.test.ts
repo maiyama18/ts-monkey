@@ -239,6 +239,9 @@ describe('parser', () => {
                 expect(() => parseProgram(input)).toThrowError(/expect peek token type/);
             });
         });
+
+        // Todo functionのテスト追加
+        // Todo clojureのテスト追加
     });
 
     describe('single statement', () => {

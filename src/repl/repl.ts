@@ -22,9 +22,8 @@ const repl = () => {
         try {
             const program = parser.parseProgram();
             const obj = evaluator.eval(program, env);
-            if (obj.objType !== 'NIL') {
-                console.log(obj.inspect());
-            }
+            console.log(obj.inspect());
+            console.log(env);
         } catch (err) {
             console.error(err.message);
         }
