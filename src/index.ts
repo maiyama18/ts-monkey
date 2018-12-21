@@ -36,3 +36,5 @@ export const evaluate = (input: string): string => {
 
     return evaluator.eval(program, env).inspect();
 };
+
+export { Token };
