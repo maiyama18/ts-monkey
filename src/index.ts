@@ -36,3 +36,10 @@ export const evaluate = (input: string): string => {
 
     return evaluator.eval(program, env).inspect();
 };
+
+export * from './token/token';
+export * from './node/node';
+export * from './node/expressions';
+export * from './node/statements';
+export * from './object/object';
+export * from './object/environment';
