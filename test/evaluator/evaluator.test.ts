@@ -380,6 +380,31 @@ add_two(3)
             });
         });
     });
+
+    describe('builtin', () => {
+        describe('len', () => {
+            it('should count the length of string', () => {
+                const input = `len("hello world")`;
+                const expected = 11;
+
+                const actual = testEval(input) as Int;
+                expect(actual.value).toBe(expected);
+            });
+
+            it('should generate 0 for empty string', () => {
+                const input = `len("")`;
+                const expected = 0;
+
+                const actual = testEval(input) as Int;
+                expect(actual.value).toBe(expected);
+            });
+
+            it('should throw error for types other than string', () => {
+                const input = `len(true)`;
+                expect(() => testEval(input)).toThrowError(`argument type wrong`);
+            });
+        });
+    });
 });
 
 const testEval = (input: string): Obj => {

@@ -1,4 +1,5 @@
 import { RuntimeError } from '../evaluator/evaluator';
+import { builtins } from './builtin';
 import { Obj } from './object';
 
 export class Environment {
@@ -14,10 +15,14 @@ export class Environment {
     if (this.store.hasOwnProperty(name)) {
       return this.store[name];
     }
+    if (this.outer !== undefined) {
+        return this.outer.get(name);
+    }
+    if (builtins.hasOwnProperty(name)) {
+        return builtins[name];
+    }
 
-    if (this.outer === undefined) { throw new RuntimeError(`undefined identifier: ${name}`); }
-
-    return this.outer.get(name);
+    throw new RuntimeError(`undefined identifier: ${name}`);
   }
 
   public set(name: string, obj: Obj): Obj {

@@ -1,4 +1,10 @@
-import { CallExpression, FunctionLiteral, IfExpression, InfixExpression, PrefixExpression } from '../node/expressions';
+import {
+    CallExpression,
+    Expression,
+    IfExpression,
+    InfixExpression,
+    PrefixExpression,
+} from '../node/expressions';
 import { Node, Program } from '../node/node';
 import { BlockStatement } from '../node/statements';
 import { Environment } from '../object/environment';
@@ -70,7 +76,7 @@ export class Evaluator {
     }
 
     private evalProgram(program: Program, env: Environment): Obj {
-        const {statements} = program;
+        const { statements } = program;
 
         let evaluated: Obj = NIL;
 
@@ -90,7 +96,7 @@ export class Evaluator {
     }
 
     private evalBlockStatement(blockStatement: BlockStatement, env: Environment): Obj {
-        const {statements} = blockStatement;
+        const { statements } = blockStatement;
 
         let evaluated: Obj = NIL;
         for (const statement of statements) {
@@ -101,7 +107,7 @@ export class Evaluator {
     }
 
     private evalPrefixExpression(prefixExp: PrefixExpression, env: Environment): Obj {
-        const {operator, right} = prefixExp;
+        const { operator, right } = prefixExp;
         const evaledRight = this.eval(right, env);
 
         switch (operator) {
@@ -121,7 +127,7 @@ export class Evaluator {
     }
 
     private evalInfixExpression(infixExp: InfixExpression, env: Environment): Obj {
-        const {operator, left, right} = infixExp;
+        const { operator, left, right } = infixExp;
         const evaledLeft = this.eval(left, env);
         const evaledRight = this.eval(right, env);
 
@@ -189,7 +195,7 @@ export class Evaluator {
     }
 
     private evalIfExpression(ifExp: IfExpression, env: Environment): Obj {
-        const {condition, consequence, alternative} = ifExp;
+        const { condition, consequence, alternative } = ifExp;
         const evaledCondition = this.eval(condition, env);
 
         if (evaledCondition === FALSE) {
@@ -203,31 +209,46 @@ export class Evaluator {
     }
 
     private evalCallExpression(callExp: CallExpression, env: Environment): Obj {
-        const {args, func} = callExp;
-        const funcLiteral = func as FunctionLiteral;
+        const { args, func } = callExp;
 
-        const evaledFunc = this.eval(funcLiteral, env);
-        if (evaledFunc.objType !== 'FUNC') {
-            return NIL;
+        const evaledFunc = this.eval(func, env);
+        const evaledArgs = this.evalArgs(args, env);
+
+        switch (evaledFunc.objType) {
+            case 'FUNC':
+                const extendedEnv = this.getEnvForFuncCall(evaledFunc, evaledArgs);
+                // implemented return using exception throwing
+                try {
+                    return this.eval(evaledFunc.body, extendedEnv);
+                } catch (err) {
+                    if (err instanceof ReturnSignal) {
+                        return err.obj;
+                    }
+                }
+                break;
+            case 'BUILTIN':
+                return evaledFunc.func(...evaledArgs);
         }
+        return NIL;
+    }
 
+    private evalArgs = (args: Expression[], env: Environment): Obj[] => {
         const evaledArgs = [];
         for (const arg of args) {
             const evaledArg = this.eval(arg, env);
             evaledArgs.push(evaledArg);
         }
 
-        const extendedEnv = evaledFunc.env.extend();
+        return evaledArgs;
+    }
+
+    private getEnvForFuncCall = (func: Func, args: Obj[]): Environment => {
+        const extendedEnv = func.env.extend();
         for (let i = 0; i < args.length; i++) {
-            const name = evaledFunc.parameters[i].name;
-
-            extendedEnv.set(name, evaledArgs[i]);
+            const name = func.parameters[i].name;
+            extendedEnv.set(name, args[i]);
         }
 
-        try {
-            return this.eval(evaledFunc.body, extendedEnv);
-        } catch (err) {
-            return err.obj;
-        }
+        return extendedEnv;
     }
 }
