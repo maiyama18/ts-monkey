@@ -203,7 +203,6 @@ export class Evaluator {
     try {
         return this.eval(evaledFunc.body, extendedEnv);
     } catch (err) {
-        console.log('CAUGHT', err);
         return err.obj;
     }
   }

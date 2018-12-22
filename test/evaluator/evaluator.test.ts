@@ -1,7 +1,7 @@
 import { Evaluator } from '../../src/evaluator/evaluator';
 import { Lexer } from '../../src/lexer/lexer';
 import { Environment } from '../../src/object/environment';
-import { Bool, Func, Int, Obj } from '../../src/object/object';
+import { Bool, Int, Obj } from '../../src/object/object';
 import { Parser } from '../../src/parser/parser';
 
 describe('evaluator', () => {
@@ -188,15 +188,6 @@ describe('evaluator', () => {
 
                 const actual = testEval(input) as Int;
                 expect(actual.value).toBe(expected);
-            });
-
-            it('should generate top-level closure', () => {
-                const input = `let a = 5; let add = fn(x) { x + a; }; add;`;
-
-                const actual = testEval(input) as Func;
-                console.log(actual);
-                console.log(actual.env);
-                // expect(actual.value).toBe(expected);
             });
 
             it('should eval top-level closure', () => {

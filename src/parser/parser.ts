@@ -1,12 +1,18 @@
 import { Lexer } from '../lexer/lexer';
 import {
-    BoolLiteral, CallExpression,
-    Expression, FunctionLiteral,
-    Identifier, IfExpression, InfixExpression,
-    IntLiteral, Operator,
+    BoolLiteral,
+    CallExpression,
+    Expression,
+    FunctionLiteral,
+    Identifier,
+    IfExpression,
+    InfixExpression,
+    IntLiteral,
+    Operator,
     ParseInfixFunc,
     ParsePrefixFunc,
     PrefixExpression,
+    StrLiteral,
 } from '../node/expressions';
 import { Program } from '../node/node';
 import { BlockStatement, ExpressionStatement, LetStatement, ReturnStatement, Statement } from '../node/statements';
@@ -61,6 +67,7 @@ export class Parser {
         this.parsePrefixFuncs = {
             IDENT: this.parseIdentifier.bind(this),
             INT: this.parseIntLiteral.bind(this),
+            STR: this.parseStrLiteral.bind(this),
             TRUE: this.parseBoolLiteral.bind(this),
             FALSE: this.parseBoolLiteral.bind(this),
             MINUS: this.parsePrefixExpression.bind(this),
@@ -218,6 +225,10 @@ export class Parser {
         }
 
         return new IntLiteral(this.currentToken, value);
+    }
+
+    private parseStrLiteral(): StrLiteral {
+        return new StrLiteral(this.currentToken, this.currentToken.literal);
     }
 
     private parseBoolLiteral(): BoolLiteral {

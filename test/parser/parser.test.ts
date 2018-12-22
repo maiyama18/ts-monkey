@@ -5,7 +5,7 @@ import {
     InfixExpression,
     IntLiteral,
     Operator,
-    PrefixExpression,
+    PrefixExpression, StrLiteral,
 } from '../../src/node/expressions';
 import {
     BlockStatement,
@@ -26,6 +26,18 @@ describe('parser', () => {
 
                 const expressionStatement = statements[0] as ExpressionStatement;
                 testSingleExpression(expressionStatement.expression, 42);
+            });
+        });
+
+        describe('StrLiteral', () => {
+            it('should parse StrLiteral', () => {
+                const input = `"hello world";`;
+                const { statements } = parseProgram(input);
+
+                expect(statements.length).toBe(1);
+
+                const expressionStatement = statements[0] as ExpressionStatement;
+                testSingleExpression(expressionStatement.expression, 'hello world');
             });
         });
 
@@ -383,19 +395,27 @@ const testInfixExpression = (
 const testSingleExpression = (expression: Expression, expected: number | boolean | string) => {
     switch (typeof expected) {
         case 'number':
-            return testIntegerLiteral(expression, expected as number);
+            return testIntLiteral(expression, expected as number);
         case 'boolean':
-            return testBooleanLiteral(expression, expected as boolean);
+            return testBoolLiteral(expression, expected as boolean);
         case 'string':
-            return testIdentifier(expression, expected as string);
+            if (expression.nodeType === 'STR_LITERAL') {
+                return testStrLiteral(expression, expected as string);
+            } else {
+                return testIdentifier(expression, expected as string);
+            }
     }
 };
 
-const testIntegerLiteral = (expression: Expression, expected: number) => {
+const testIntLiteral = (expression: Expression, expected: number) => {
     expect(expression).toBeInstanceOf(IntLiteral);
     expect((expression as IntLiteral).value).toBe(expected);
 };
-const testBooleanLiteral = (expression: Expression, expected: boolean) => {
+const testStrLiteral = (expression: Expression, expected: string) => {
+    expect(expression).toBeInstanceOf(StrLiteral);
+    expect((expression as StrLiteral).value).toBe(expected);
+};
+const testBoolLiteral = (expression: Expression, expected: boolean) => {
     expect(expression).toBeInstanceOf(BoolLiteral);
     expect((expression as BoolLiteral).value).toBe(expected);
 };

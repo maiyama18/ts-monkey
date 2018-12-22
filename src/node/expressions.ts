@@ -4,6 +4,7 @@ import { BlockStatement } from './statements';
 export type Expression =
     | Identifier
     | IntLiteral
+    | StrLiteral
     | BoolLiteral
     | PrefixExpression
     | InfixExpression
@@ -37,6 +38,21 @@ export class IntLiteral {
     public value: number;
 
     constructor(token: Token, value: number) {
+        this.token = token;
+        this.value = value;
+    }
+
+    public string(): string {
+        return this.value.toString();
+    }
+}
+
+export class StrLiteral {
+    public readonly nodeType = 'STR_LITERAL';
+    public token: Token;
+    public value: string;
+
+    constructor(token: Token, value: string) {
         this.token = token;
         this.value = value;
     }
