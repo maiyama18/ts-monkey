@@ -4,6 +4,7 @@ export type TokenType =
   // identifier & literal
   | 'IDENT'
   | 'INT'
+  | 'STR'
   // operators
   | 'ASSIGN'
   | 'PLUS'

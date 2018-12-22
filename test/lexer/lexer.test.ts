@@ -78,6 +78,28 @@ let result = add(five, 10);
       });
     });
 
+    it('should tokenize string', () => {
+          const input = `
+"hello";
+"hello world";
+`;
+          const expectedTokens = [
+              new Token('STR', 'hello'),
+              new Token('SEMICOLON', ';'),
+
+              new Token('STR', 'hello world'),
+              new Token('SEMICOLON', ';'),
+
+              new Token('EOF', ''),
+          ];
+
+          const lexer = new Lexer(input);
+
+          expectedTokens.forEach((expectedToken) => {
+              expect(lexer.nextToken()).toEqual(expectedToken);
+          });
+      });
+
     it('should tokenize additional one-character symbols', () => {
       const input = `-*/><!;`;
       const expectedTokens = [
