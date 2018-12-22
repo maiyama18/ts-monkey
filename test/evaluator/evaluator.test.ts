@@ -172,6 +172,38 @@ describe('evaluator', () => {
                 expect(actual.value).toBe(expected);
             });
 
+            it('should eval [str] == [str] for true', () => {
+                const input = '"hello" == "hello";';
+                const expected = true;
+
+                const actual = testEval(input) as Bool;
+                expect(actual.value).toBe(expected);
+            });
+
+            it('should eval [str] == [str] for false', () => {
+                const input = '"hello" == "world";';
+                const expected = false;
+
+                const actual = testEval(input) as Bool;
+                expect(actual.value).toBe(expected);
+            });
+
+            it('should eval [str] != [str] for true', () => {
+                const input = '"hello" != "world";';
+                const expected = true;
+
+                const actual = testEval(input) as Bool;
+                expect(actual.value).toBe(expected);
+            });
+
+            it('should eval [str] != [str] for false', () => {
+                const input = '"hello" != "hello";';
+                const expected = false;
+
+                const actual = testEval(input) as Bool;
+                expect(actual.value).toBe(expected);
+            });
+
             it('should throw error for [int] + [bool]', () => {
                 const input = '2 + true;';
                 expect(() => testEval(input)).toThrowError(`type mismatch`);

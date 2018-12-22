@@ -131,15 +131,17 @@ export class Evaluator {
 
         switch (evaledLeft.objType) {
             case 'INT':
-                return this.evalInfixIntegersExpression(operator, evaledLeft, evaledRight as Int);
+                return this.evalInfixIntsExpression(operator, evaledLeft, evaledRight as Int);
+            case 'STR':
+                return this.evalInfixStrsExpression(operator, evaledLeft, evaledRight as Str);
             case 'BOOL':
-                return this.evalInfixBooleansExpression(operator, evaledLeft, evaledRight as Bool);
+                return this.evalInfixBoolsExpression(operator, evaledLeft, evaledRight as Bool);
         }
 
         return NIL;
     }
 
-    private evalInfixIntegersExpression(operator: string, left: Int, right: Int): Obj {
+    private evalInfixIntsExpression(operator: string, left: Int, right: Int): Obj {
         switch (operator) {
             case '+':
                 return new Int(left.value + right.value);
@@ -162,7 +164,20 @@ export class Evaluator {
         throw new RuntimeError(`invalid operator: ${left.objType} ${operator} ${right.objType}`);
     }
 
-    private evalInfixBooleansExpression(operator: string, left: Bool, right: Bool): Obj {
+    private evalInfixStrsExpression(operator: string, left: Str, right: Str): Obj {
+        switch (operator) {
+            case '+':
+                return new Str(left.value + right.value);
+            case '==':
+                return left.value === right.value ? TRUE : FALSE;
+            case '!=':
+                return left.value !== right.value ? TRUE : FALSE;
+        }
+
+        throw new RuntimeError(`invalid operator: ${left.objType} ${operator} ${right.objType}`);
+    }
+
+    private evalInfixBoolsExpression(operator: string, left: Bool, right: Bool): Obj {
         switch (operator) {
             case '==':
                 return left.value === right.value ? TRUE : FALSE;
