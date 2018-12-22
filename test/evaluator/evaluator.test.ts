@@ -1,7 +1,7 @@
 import { Evaluator } from '../../src/evaluator/evaluator';
 import { Lexer } from '../../src/lexer/lexer';
 import { Environment } from '../../src/object/environment';
-import { Bool, Int, Obj } from '../../src/object/object';
+import { Bool, Int, Obj, Str } from '../../src/object/object';
 import { Parser } from '../../src/parser/parser';
 
 describe('evaluator', () => {
@@ -12,6 +12,16 @@ describe('evaluator', () => {
                 const expected = 42;
 
                 const actual = testEval(input) as Int;
+                expect(actual.value).toBe(expected);
+            });
+        });
+
+        describe('str', () => {
+            it('should eval str', () => {
+                const input = `"hello world!";`;
+                const expected = 'hello world!';
+
+                const actual = testEval(input) as Str;
                 expect(actual.value).toBe(expected);
             });
         });
@@ -154,6 +164,14 @@ describe('evaluator', () => {
                 expect(actual.value).toBe(expected);
             });
 
+            it('should eval [str] + [str]', () => {
+                const input = '"hello" + " " + "world!"';
+                const expected = 'hello world!';
+
+                const actual = testEval(input) as Str;
+                expect(actual.value).toBe(expected);
+            });
+
             it('should throw error for [int] + [bool]', () => {
                 const input = '2 + true;';
                 expect(() => testEval(input)).toThrowError(`type mismatch`);
@@ -161,6 +179,11 @@ describe('evaluator', () => {
 
             it('should throw error for [bool] + [bool]', () => {
                 const input = 'false + true;';
+                expect(() => testEval(input)).toThrowError(`invalid operator`);
+            });
+
+            it('should eval [str] - [str]', () => {
+                const input = '"hello" - " world"';
                 expect(() => testEval(input)).toThrowError(`invalid operator`);
             });
         });

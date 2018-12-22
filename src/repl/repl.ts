@@ -23,7 +23,6 @@ const repl = () => {
             const program = parser.parseProgram();
             const obj = evaluator.eval(program, env);
             console.log(obj.inspect());
-            console.log(env);
         } catch (err) {
             console.error(err.message);
         }

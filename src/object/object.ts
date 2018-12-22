@@ -2,7 +2,7 @@ import { Identifier } from '../node/expressions';
 import { BlockStatement } from '../node/statements';
 import { Environment } from './environment';
 
-export type Obj = Int | Bool | Func | Nil;
+export type Obj = Int | Str | Bool | Func | Nil;
 
 export class Int {
     public readonly objType = 'INT';
@@ -14,6 +14,19 @@ export class Int {
 
     public inspect(): string {
         return this.value.toString();
+    }
+}
+
+export class Str {
+    public readonly objType = 'STR';
+    public value: string;
+
+    constructor(value: string) {
+        this.value = value;
+    }
+
+    public inspect(): string {
+        return this.value;
     }
 }
 
