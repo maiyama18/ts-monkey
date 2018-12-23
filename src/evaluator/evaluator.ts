@@ -60,7 +60,7 @@ export class Evaluator {
                 return new Str(node.value);
             case 'BOOL_LITERAL':
                 return node.value ? TRUE : FALSE;
-            case 'FUNCTION_LITERAL':
+            case 'FUNC_LITERAL':
                 return new Func(node.parameters, node.body, env);
             case 'PREFIX_EXPRESSION':
                 return this.evalPrefixExpression(node, env);

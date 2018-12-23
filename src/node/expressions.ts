@@ -9,8 +9,9 @@ export type Expression =
     | PrefixExpression
     | InfixExpression
     | IfExpression
-    | FunctionLiteral
-    | CallExpression;
+    | FuncLiteral
+    | CallExpression
+    | ArrLiteral;
 
 export type Operator = '+' | '-' | '*' | '/' | '!' | '==' | '!=' | '>' | '<';
 
@@ -132,8 +133,8 @@ export class IfExpression {
     }
 }
 
-export class FunctionLiteral {
-    public readonly nodeType = 'FUNCTION_LITERAL';
+export class FuncLiteral {
+    public readonly nodeType = 'FUNC_LITERAL';
     public readonly token = new Token('IF', 'if');
     public parameters: Identifier[];
     public body: BlockStatement;
@@ -161,5 +162,19 @@ export class CallExpression {
 
     public string(): string {
         return `${this.func.string()}(${this.args.map((arg) => arg.string()).join(', ')})`;
+    }
+}
+
+export class ArrLiteral {
+    public readonly nodeType = 'ARR_LITERAL';
+    public token = new Token('LBRACKET', '[');
+    public elements: Expression[];
+
+    constructor(elements: Expression[]) {
+        this.elements = elements;
+    }
+
+    public string(): string {
+        return `[${this.elements.map((e) => e.string()).join(', ')}]`;
     }
 }

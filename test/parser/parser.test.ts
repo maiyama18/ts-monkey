@@ -1,7 +1,8 @@
 import { Lexer } from '../../src/lexer/lexer';
 import {
+    ArrLiteral,
     BoolLiteral,
-    Expression, FunctionLiteral, Identifier, IfExpression,
+    Expression, FuncLiteral, Identifier, IfExpression,
     InfixExpression,
     IntLiteral,
     Operator,
@@ -261,7 +262,7 @@ describe('parser', () => {
 
                 const expressionStatement = statements[0] as ExpressionStatement;
 
-                const funcLiteral = expressionStatement.expression as FunctionLiteral;
+                const funcLiteral = expressionStatement.expression as FuncLiteral;
 
                 expect(funcLiteral.parameters[0].name).toBe('x');
                 expect(funcLiteral.parameters[1].name).toBe('y');
@@ -279,7 +280,7 @@ describe('parser', () => {
                 expect(statements.length).toBe(1);
 
                 const expressionStatement = statements[0] as ExpressionStatement;
-                const funcLiteral = expressionStatement.expression as FunctionLiteral;
+                const funcLiteral = expressionStatement.expression as FuncLiteral;
 
                 expect(funcLiteral.parameters.length).toBe(1);
                 expect(funcLiteral.parameters[0].name).toBe('x');
@@ -287,7 +288,7 @@ describe('parser', () => {
                 expect(funcLiteral.body.statements.length).toBe(1);
 
                 const nextedExpressionStatement = funcLiteral.body.statements[0] as ExpressionStatement;
-                const closureLiteral = nextedExpressionStatement.expression as FunctionLiteral;
+                const closureLiteral = nextedExpressionStatement.expression as FuncLiteral;
 
                 expect(closureLiteral.parameters.length).toBe(1);
                 expect(closureLiteral.parameters[0].name).toBe('y');
@@ -296,6 +297,51 @@ describe('parser', () => {
                     (((closureLiteral.body.statements[0]) as ExpressionStatement).expression),
                     'x', '+', 'y',
                 );
+            });
+        });
+
+        describe('array literal', () => {
+            it('should parse empty array', () => {
+                const input = `[];`;
+                const { statements } = parseProgram(input);
+
+                expect(statements.length).toBe(1);
+
+                const expressionStatement = statements[0] as ExpressionStatement;
+                const arrLiteral = expressionStatement.expression as ArrLiteral;
+
+                expect(arrLiteral.elements.length).toBe(0);
+            });
+
+            it('should parse array with literal elements', () => {
+                const input = `[1, "hello", true];`;
+                const { statements } = parseProgram(input);
+
+                expect(statements.length).toBe(1);
+
+                const expressionStatement = statements[0] as ExpressionStatement;
+                const arrLiteral = expressionStatement.expression as ArrLiteral;
+
+                const { elements } = arrLiteral;
+                expect(elements.length).toBe(3);
+                testSingleExpression(elements[0], 1);
+                testSingleExpression(elements[1], 'hello');
+                testSingleExpression(elements[2], true);
+            });
+
+            it('should parse array with complex expression elements', () => {
+                const input = `[-1, x * y];`;
+                const { statements } = parseProgram(input);
+
+                expect(statements.length).toBe(1);
+
+                const expressionStatement = statements[0] as ExpressionStatement;
+                const arrLiteral = expressionStatement.expression as ArrLiteral;
+
+                const { elements } = arrLiteral;
+                expect(elements.length).toBe(2);
+                testPrefixExpression(elements[0], '-', 1);
+                testInfixExpression(elements[1], 'x', '*', 'y');
             });
         });
     });

@@ -1,9 +1,10 @@
 import { Lexer } from '../lexer/lexer';
 import {
+    ArrLiteral,
     BoolLiteral,
     CallExpression,
     Expression,
-    FunctionLiteral,
+    FuncLiteral,
     Identifier,
     IfExpression,
     InfixExpression,
@@ -74,7 +75,7 @@ export class Parser {
             BANG: this.parsePrefixExpression.bind(this),
             LPAREN: this.parseGroupedExpression.bind(this),
             IF: this.parseIfExpression.bind(this),
-            FUNCTION: this.parseFunctionLiteral.bind(this),
+            FUNC: this.parseFuncLiteral.bind(this),
         };
         this.parseInfixFuncs = {
             EQ: this.parseInfixExpression.bind(this),
@@ -290,17 +291,18 @@ export class Parser {
         }
     }
 
-    private parseFunctionLiteral(): FunctionLiteral {
+
+    private parseFuncLiteral(): FuncLiteral {
         this.expectPeekTokenType('LPAREN');
-        const parameters = this.parseFunctionParameters();
+        const parameters = this.parseFuncParameters();
 
         this.expectPeekTokenType('LBRACE');
         const body = this.parseBlockStatement();
 
-        return new FunctionLiteral(parameters, body);
+        return new FuncLiteral(parameters, body);
     }
 
-    private parseFunctionParameters(): Identifier[] {
+    private parseFuncParameters(): Identifier[] {
         const parameters: Identifier[] = [];
         if (this.isPeekTokenType('RPAREN')) {
             this.nextToken();
@@ -320,6 +322,9 @@ export class Parser {
 
         return parameters;
     }
+
+    // private parseArrLiteral(): ArrLiteral {
+    // }
 
     private parseCallExpression(func: Expression): CallExpression {
         const args = this.parseCallArgs();

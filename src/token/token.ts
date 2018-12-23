@@ -28,7 +28,7 @@ export type TokenType =
     | 'RBRACKET'
     // keywords
     | 'LET'
-    | 'FUNCTION'
+    | 'FUNC'
     | 'IF'
     | 'ELSE'
     | 'RETURN'
@@ -50,7 +50,7 @@ export const getTokenTypeFromLiteral = (literal: string): TokenType => {
         case 'let':
             return 'LET';
         case 'fn':
-            return 'FUNCTION';
+            return 'FUNC';
         case 'if':
             return 'IF';
         case 'else':

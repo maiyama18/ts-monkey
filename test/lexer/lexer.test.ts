@@ -42,7 +42,7 @@ let result = add(five, 10);
                 new Token('LET', 'let'),
                 new Token('IDENT', 'add'),
                 new Token('ASSIGN', '='),
-                new Token('FUNCTION', 'fn'),
+                new Token('FUNC', 'fn'),
                 new Token('LPAREN', '('),
                 new Token('IDENT', 'x'),
                 new Token('COMMA', ','),
