@@ -58,6 +58,12 @@ export class Lexer {
             case ')':
                 token = new Token('RPAREN', ')');
                 break;
+            case '[':
+                token = new Token('LBRACKET', '[');
+                break;
+            case ']':
+                token = new Token('RBRACKET', ']');
+                break;
             case '{':
                 token = new Token('LBRACE', '{');
                 break;
