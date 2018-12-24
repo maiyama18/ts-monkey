@@ -410,7 +410,7 @@ add_two(3)
 
     describe('builtin', () => {
         describe('len', () => {
-            it('should count the length of string', () => {
+            it('should count the length of STR', () => {
                 const input = `len("hello world")`;
                 const expected = 11;
 
@@ -418,7 +418,7 @@ add_two(3)
                 expect(actual.value).toBe(expected);
             });
 
-            it('should generate 0 for empty string', () => {
+            it('should generate 0 for empty STR', () => {
                 const input = `len("")`;
                 const expected = 0;
 
@@ -426,7 +426,23 @@ add_two(3)
                 expect(actual.value).toBe(expected);
             });
 
-            it('should throw error for types other than string', () => {
+            it('should count the length of ARR', () => {
+                const input = `len([1, 2, 3, "hello", true])`;
+                const expected = 5;
+
+                const actual = testEval(input) as Int;
+                expect(actual.value).toBe(expected);
+            });
+
+            it('should generate 0 for empty ARR', () => {
+                const input = `len([])`;
+                const expected = 0;
+
+                const actual = testEval(input) as Int;
+                expect(actual.value).toBe(expected);
+            });
+
+            it('should throw error for types other than STR / ARR', () => {
                 const input = `len(true)`;
                 expect(() => testEval(input)).toThrowError(`argument type wrong`);
             });
