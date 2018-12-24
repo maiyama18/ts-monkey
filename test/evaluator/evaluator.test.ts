@@ -456,6 +456,31 @@ add_two(3)
                 const actual = testEval(input) as Int;
                 expect(actual.value).toBe(expected);
             });
+
+            it('should throw error for wrong number of arguments', () => {
+                const input = `let arr = push([0,1,2])`;
+                expect(() => testEval(input)).toThrowError(`number of arguments`);
+            });
+        });
+
+        describe('first', () => {
+            it('should return the first element of ARR', () => {
+                const input = `first([2, 0, 1])`;
+                const expected = 2;
+
+                const actual = testEval(input) as Int;
+                expect(actual.value).toBe(expected);
+            });
+        });
+
+        describe('last', () => {
+            it('should return the last element of ARR', () => {
+                const input = `last([2, 0, 1])`;
+                const expected = 1;
+
+                const actual = testEval(input) as Int;
+                expect(actual.value).toBe(expected);
+            });
         });
     });
 });

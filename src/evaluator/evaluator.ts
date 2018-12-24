@@ -11,9 +11,9 @@ import { BlockStatement } from '../node/statements';
 import { Environment } from '../object/environment';
 import { Arr, Bool, Func, Int, Nil, Obj, Str } from '../object/object';
 
-const TRUE = new Bool(true);
-const FALSE = new Bool(false);
-const NIL = new Nil();
+export const TRUE = new Bool(true);
+export const FALSE = new Bool(false);
+export const NIL = new Nil();
 
 export class RuntimeError implements Error {
     public readonly name = 'RuntimeError';
