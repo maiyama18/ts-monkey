@@ -53,9 +53,22 @@ const lastFunc = (...args: Obj[]): Obj => {
     return (arr.elements.length === 0) ? NIL : arr.elements.slice(-1)[0];
 };
 
+const restFunc = (...args: Obj[]): Obj => {
+    if (args.length !== 1) {
+        throw new RuntimeError(`number of arguments for rest wrong: expected=1, got=${args.length}`);
+    }
+    const arr = args[0];
+    if (arr.objType !== 'ARR') {
+        throw new RuntimeError(`argument type for rest wrong: expected=ARR, got=${arr.objType}`);
+    }
+
+    return (arr.elements.length === 0) ? NIL : new Arr(arr.elements.slice(1));
+};
+
 export const builtins: {[name: string]: Builtin} = {
     len: new Builtin(lenFunc),
     push: new Builtin(pushFunc),
     first: new Builtin(firstFunc),
     last: new Builtin(lastFunc),
+    rest: new Builtin(restFunc),
 };

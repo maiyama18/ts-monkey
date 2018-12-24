@@ -1,7 +1,7 @@
-import { Evaluator } from '../../src/evaluator/evaluator';
+import { Evaluator, NIL } from '../../src/evaluator/evaluator';
 import { Lexer } from '../../src/lexer/lexer';
 import { Environment } from '../../src/object/environment';
-import { Bool, Int, Obj, Str } from '../../src/object/object';
+import { Arr, Bool, Int, Obj, Str } from '../../src/object/object';
 import { Parser } from '../../src/parser/parser';
 
 describe('evaluator', () => {
@@ -480,6 +480,39 @@ add_two(3)
 
                 const actual = testEval(input) as Int;
                 expect(actual.value).toBe(expected);
+            });
+        });
+
+        describe('rest', () => {
+            it('should return the elements except for the first element of ARR', () => {
+                const input = `rest([0, 1, 2])`;
+
+                const rested = testEval(input) as Arr;
+                expect(rested.elements.length).toBe(2);
+                expect((rested.elements[0] as Int).value).toBe(1);
+                expect((rested.elements[1] as Int).value).toBe(2);
+            });
+
+            it('should return empty Arr for Arr with one element', () => {
+                const input = `rest([0])`;
+
+                const rested = testEval(input) as Arr;
+                expect(rested.elements.length).toBe(0);
+            });
+
+            it('should return empty Nil for empty Arr', () => {
+                const input = `rest([])`;
+
+                const rested = testEval(input);
+                expect(rested).toBe(NIL);
+            });
+
+            it('should work recursively', () => {
+                const input = `rest(rest([0, 1, 2]))`;
+
+                const rested = testEval(input) as Arr;
+                expect(rested.elements.length).toBe(1);
+                expect((rested.elements[0] as Int).value).toBe(2);
             });
         });
     });
