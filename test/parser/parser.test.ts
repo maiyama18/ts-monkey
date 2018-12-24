@@ -1,8 +1,8 @@
 import { Lexer } from '../../src/lexer/lexer';
 import {
     ArrLiteral,
-    BoolLiteral,
-    Expression, FuncLiteral, Identifier, IfExpression,
+    BoolLiteral, CallExpression,
+    Expression, FuncLiteral, Identifier, IfExpression, IndexExpression,
     InfixExpression,
     IntLiteral,
     Operator,
@@ -342,6 +342,91 @@ describe('parser', () => {
                 expect(elements.length).toBe(2);
                 testPrefixExpression(elements[0], '-', 1);
                 testInfixExpression(elements[1], 'x', '*', 'y');
+            });
+        });
+
+        describe('index expression', () => {
+            it('it should parse index expression', () => {
+                const input = `arr[1];`;
+                const { statements } = parseProgram(input);
+
+                expect(statements.length).toBe(1);
+
+                const expressionStatement = statements[0] as ExpressionStatement;
+                const indexExpression = expressionStatement.expression as IndexExpression;
+
+                testSingleExpression(indexExpression.left, 'arr');
+                testSingleExpression(indexExpression.index, 1);
+            });
+
+            it('it should parse index expression with infix index', () => {
+                const input = `arr[2 * 3];`;
+                const { statements } = parseProgram(input);
+
+                expect(statements.length).toBe(1);
+
+                const expressionStatement = statements[0] as ExpressionStatement;
+                const indexExpression = expressionStatement.expression as IndexExpression;
+
+                testSingleExpression(indexExpression.left, 'arr');
+                testInfixExpression(indexExpression.index, 2, '*', 3);
+            });
+
+            it('it should parse index expression with infix index', () => {
+                const input = `arr[2 * 3];`;
+                const { statements } = parseProgram(input);
+
+                expect(statements.length).toBe(1);
+
+                const expressionStatement = statements[0] as ExpressionStatement;
+                const indexExpression = expressionStatement.expression as IndexExpression;
+
+                testSingleExpression(indexExpression.left, 'arr');
+                testInfixExpression(indexExpression.index, 2, '*', 3);
+            });
+
+            it('it should parse index expression with callExpression index', () => {
+                const input = `arr[get_index()];`;
+                const { statements } = parseProgram(input);
+
+                expect(statements.length).toBe(1);
+
+                const expressionStatement = statements[0] as ExpressionStatement;
+                const indexExpression = expressionStatement.expression as IndexExpression;
+
+                testSingleExpression(indexExpression.left, 'arr');
+                const callExp = indexExpression.index as CallExpression;
+                testSingleExpression(callExp.func, 'get_index');
+                expect(callExp.args.length).toBe(0);
+            });
+
+            it('it should parse index expression with callExpression left', () => {
+                const input = `get_array()[1];`;
+                const { statements } = parseProgram(input);
+
+                expect(statements.length).toBe(1);
+
+                const expressionStatement = statements[0] as ExpressionStatement;
+                const indexExpression = expressionStatement.expression as IndexExpression;
+
+                const callExp = indexExpression.left as CallExpression;
+                testSingleExpression(callExp.func, 'get_array');
+                testSingleExpression(indexExpression.index, 1);
+            });
+
+            it('it should parse index expression with array literal left', () => {
+                const input = `["hello", "hey"][1];`;
+                const { statements } = parseProgram(input);
+
+                expect(statements.length).toBe(1);
+
+                const expressionStatement = statements[0] as ExpressionStatement;
+                const indexExpression = expressionStatement.expression as IndexExpression;
+
+                const arrLiteral = indexExpression.left as ArrLiteral;
+                expect(arrLiteral.elements.length).toBe(2);
+                testSingleExpression(arrLiteral.elements[0], 'hello');
+                testSingleExpression(arrLiteral.elements[1], 'hey');
             });
         });
     });

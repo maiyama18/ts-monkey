@@ -24,7 +24,6 @@ export type TokenType =
     | 'LBRACE'
     | 'RBRACE'
     | 'LBRACKET'
-    | 'LBRACKET'
     | 'RBRACKET'
     // keywords
     | 'LET'

@@ -11,7 +11,8 @@ export type Expression =
     | IfExpression
     | FuncLiteral
     | CallExpression
-    | ArrLiteral;
+    | ArrLiteral
+    | IndexExpression;
 
 export type Operator = '+' | '-' | '*' | '/' | '!' | '==' | '!=' | '>' | '<';
 
@@ -176,5 +177,21 @@ export class ArrLiteral {
 
     public string(): string {
         return `[${this.elements.map((e) => e.string()).join(', ')}]`;
+    }
+}
+
+export class IndexExpression {
+    public readonly nodeType = 'INDEX_EXPRESSION';
+    public readonly token = new Token('LPAREN', '[');
+    public left: Expression;
+    public index: Expression;
+
+    constructor(left: Expression, index: Expression) {
+        this.left = left;
+        this.index = index;
+    }
+
+    public string(): string {
+        return `${this.left}[${this.index}]`;
     }
 }

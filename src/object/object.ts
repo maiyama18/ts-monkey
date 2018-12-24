@@ -1,8 +1,8 @@
-import { Identifier } from '../node/expressions';
+import { Expression, Identifier } from '../node/expressions';
 import { BlockStatement } from '../node/statements';
 import { Environment } from './environment';
 
-export type Obj = Int | Str | Bool | Func | Builtin | Nil;
+export type Obj = Int | Str | Bool | Func | Arr | Builtin | Nil;
 
 export class Int {
     public readonly objType = 'INT';
@@ -57,6 +57,23 @@ export class Func {
 
     public inspect(): string {
         return `fn(${this.parameters.map((p) => p.name).join(', ')}) { ${this.body.string()} }`;
+    }
+}
+
+export class Arr {
+    public readonly objType = 'ARR';
+    public elements: Expression[];
+
+    constructor(elements: Expression[]) {
+        this.elements = elements;
+    }
+
+    public hasIndex(index: number): boolean {
+        return 0 <= index && index < this.elements.length;
+    }
+
+    public inspect(): string {
+        return `[${this.elements.map((e) => e.string()).join(', ')}]`;
     }
 }
 

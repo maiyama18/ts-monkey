@@ -6,7 +6,7 @@ import {
     Expression,
     FuncLiteral,
     Identifier,
-    IfExpression,
+    IfExpression, IndexExpression,
     InfixExpression,
     IntLiteral,
     Operator,
@@ -27,6 +27,7 @@ enum Precedence {
     ASTERISK_SLASH,
     PREFIX,
     CALL,
+    INDEX,
 }
 
 const infixPrecedences: { [type in TokenType]?: Precedence } = {
@@ -39,6 +40,7 @@ const infixPrecedences: { [type in TokenType]?: Precedence } = {
     ASTERISK: Precedence.ASTERISK_SLASH,
     SLASH: Precedence.ASTERISK_SLASH,
     LPAREN: Precedence.CALL,
+    LBRACKET: Precedence.INDEX,
 };
 
 class ParseError implements Error {
@@ -76,6 +78,7 @@ export class Parser {
             LPAREN: this.parseGroupedExpression.bind(this),
             IF: this.parseIfExpression.bind(this),
             FUNC: this.parseFuncLiteral.bind(this),
+            LBRACKET: this.parseArrLiteral.bind(this),
         };
         this.parseInfixFuncs = {
             EQ: this.parseInfixExpression.bind(this),
@@ -87,6 +90,7 @@ export class Parser {
             ASTERISK: this.parseInfixExpression.bind(this),
             SLASH: this.parseInfixExpression.bind(this),
             LPAREN: this.parseCallExpression.bind(this),
+            LBRACKET: this.parseIndexExpression.bind(this),
         };
 
         this.nextToken();
@@ -291,10 +295,9 @@ export class Parser {
         }
     }
 
-
     private parseFuncLiteral(): FuncLiteral {
         this.expectPeekTokenType('LPAREN');
-        const parameters = this.parseFuncParameters();
+        const parameters = this.parseCommaSeparatedExpressions('RPAREN') as Identifier[];
 
         this.expectPeekTokenType('LBRACE');
         const body = this.parseBlockStatement();
@@ -302,53 +305,43 @@ export class Parser {
         return new FuncLiteral(parameters, body);
     }
 
-    private parseFuncParameters(): Identifier[] {
-        const parameters: Identifier[] = [];
-        if (this.isPeekTokenType('RPAREN')) {
-            this.nextToken();
-            return parameters;
-        }
-
-        this.nextToken();
-        parameters.push(this.parseIdentifier());
-
-        while (!this.isPeekTokenType('RPAREN')) {
-            this.expectPeekTokenType('COMMA');
-
-            this.nextToken();
-            parameters.push(this.parseIdentifier());
-        }
-        this.nextToken();
-
-        return parameters;
-    }
-
-    // private parseArrLiteral(): ArrLiteral {
-    // }
-
     private parseCallExpression(func: Expression): CallExpression {
-        const args = this.parseCallArgs();
+        const args = this.parseCommaSeparatedExpressions('RPAREN');
 
         return new CallExpression(func, args);
     }
 
-    private parseCallArgs(): Expression[] {
-        const args: Expression[] = [];
-        if (this.isPeekTokenType('RPAREN')) {
+    private parseArrLiteral(): ArrLiteral {
+        const elements = this.parseCommaSeparatedExpressions('RBRACKET');
+
+        return new ArrLiteral(elements);
+    }
+
+    private parseIndexExpression(left: Expression): IndexExpression {
+        this.nextToken();
+        const index = this.parseExpression(Precedence.LOWEST);
+        this.nextToken();
+
+        return new IndexExpression(left, index);
+    }
+
+    private parseCommaSeparatedExpressions(finishTokenType: TokenType): Expression[] {
+        const expressions: Expression[] = [];
+        if (this.isPeekTokenType(finishTokenType)) {
             this.nextToken();
-            return args;
+            return expressions;
         }
 
         this.nextToken();
-        args.push(this.parseExpression(Precedence.LOWEST));
+        expressions.push(this.parseExpression(Precedence.LOWEST));
 
-        while (!this.isPeekTokenType('RPAREN')) {
+        while (!this.isPeekTokenType(finishTokenType)) {
             this.expectPeekTokenType('COMMA');
             this.nextToken();
-            args.push(this.parseExpression(Precedence.LOWEST));
+            expressions.push(this.parseExpression(Precedence.LOWEST));
         }
         this.nextToken();
 
-        return args;
+        return expressions;
     }
 }

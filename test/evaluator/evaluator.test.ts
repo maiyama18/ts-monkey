@@ -304,6 +304,33 @@ add_two(3)
             });
         });
 
+        describe('index', () => {
+            it('should eval index expression', () => {
+                const input = `["hello", "world"][1];`;
+                const expected = 'world';
+
+                const actual = testEval(input) as Str;
+                expect(actual.value).toBe(expected);
+            });
+
+            it('should eval index expression with identifier left', () => {
+                const input = `let arr = ["hello", "world"]; arr[1];`;
+                const expected = 'world';
+
+                const actual = testEval(input) as Str;
+                expect(actual.value).toBe(expected);
+            });
+
+            it('should throw for out of range index', () => {
+                const input = `let arr = ["hello", "world"]; arr[3];`;
+                expect(() => testEval(input)).toThrowError(`out of range`);
+            });
+
+            it('should throw for non int index', () => {
+                const input = `let arr = ["hello", "world"]; arr["hello"];`;
+                expect(() => testEval(input)).toThrowError(`not an INT`);
+            });
+        });
     });
 
     describe('statements', () => {

@@ -1,14 +1,14 @@
 import {
     CallExpression,
     Expression,
-    IfExpression,
+    IfExpression, IndexExpression,
     InfixExpression,
     PrefixExpression,
 } from '../node/expressions';
 import { Node, Program } from '../node/node';
 import { BlockStatement } from '../node/statements';
 import { Environment } from '../object/environment';
-import { Bool, Func, Int, Nil, Obj, Str } from '../object/object';
+import { Arr, Bool, Func, Int, Nil, Obj, Str } from '../object/object';
 
 const TRUE = new Bool(true);
 const FALSE = new Bool(false);
@@ -60,16 +60,20 @@ export class Evaluator {
                 return new Str(node.value);
             case 'BOOL_LITERAL':
                 return node.value ? TRUE : FALSE;
-            case 'FUNC_LITERAL':
-                return new Func(node.parameters, node.body, env);
             case 'PREFIX_EXPRESSION':
                 return this.evalPrefixExpression(node, env);
             case 'INFIX_EXPRESSION':
                 return this.evalInfixExpression(node, env);
             case 'IF_EXPRESSION':
                 return this.evalIfExpression(node, env);
+            case 'FUNC_LITERAL':
+                return new Func(node.parameters, node.body, env);
             case 'CALL_EXPRESSION':
                 return this.evalCallExpression(node, env);
+            case 'ARR_LITERAL':
+                return new Arr(node.elements);
+            case 'INDEX_EXPRESSION':
+                return this.evalIndexExpression(node, env);
         }
 
         return NIL;
@@ -250,5 +254,24 @@ export class Evaluator {
         }
 
         return extendedEnv;
+    }
+
+    private evalIndexExpression(indexExp: IndexExpression, env: Environment): Obj {
+        const { left, index } = indexExp;
+
+        const evaledLeft = this.eval(left, env);
+        const evaledIndex = this.eval(index, env);
+
+        if (evaledIndex.objType !== 'INT') {
+            throw new RuntimeError(`${evaledIndex.inspect()} is not an INT: got=${evaledIndex.objType}`);
+        }
+        if (evaledLeft.objType !== 'ARR') {
+            throw new RuntimeError(`${evaledLeft.inspect()} is not an ARR: got=${evaledLeft.objType}`);
+        }
+        if (!evaledLeft.hasIndex(evaledIndex.value)) {
+            throw new RuntimeError(`index ${evaledIndex.inspect()} out of range for ARR ${evaledLeft.inspect()}`);
+        }
+
+        return this.eval(evaledLeft.elements[evaledIndex.value], env);
     }
 }

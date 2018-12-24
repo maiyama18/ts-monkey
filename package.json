@@ -7,7 +7,8 @@
     "prepublish": "tsc",
     "build": "tsc",
     "test": "jest --verbose false",
-    "lint": "tslint --project tsconfig.json"
+    "lint": "tslint --project tsconfig.json",
+    "repl": "yarn build && node ./lib/repl/repl.js"
   },
   "keywords": [],
   "author": "",
