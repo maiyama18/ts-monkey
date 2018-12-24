@@ -447,6 +447,16 @@ add_two(3)
                 expect(() => testEval(input)).toThrowError(`argument type wrong`);
             });
         });
+
+        describe('push', () => {
+            it('should push an element to array', () => {
+                const input = `let arr = push([0,1,2], 3); arr[3]`;
+                const expected = 3;
+
+                const actual = testEval(input) as Int;
+                expect(actual.value).toBe(expected);
+            });
+        });
     });
 });
 

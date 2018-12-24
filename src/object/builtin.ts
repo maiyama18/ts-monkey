@@ -1,9 +1,9 @@
 import { RuntimeError } from '../evaluator/evaluator';
-import { Builtin, Int, Obj } from './object';
+import { Arr, Builtin, Int, Obj } from './object';
 
 const lenFunc = (...args: Obj[]): Int => {
     if (args.length !== 1) {
-        throw new RuntimeError(`number of arguments wrong: expected=1, got=${args.length}`);
+        throw new RuntimeError(`number of arguments for len wrong: expected=1, got=${args.length}`);
     }
     const arg = args[0];
     switch (arg.objType) {
@@ -16,6 +16,20 @@ const lenFunc = (...args: Obj[]): Int => {
     }
 };
 
+const pushFunc = (...args: Obj[]): Arr => {
+    if (args.length !== 2) {
+        throw new RuntimeError(`number of arguments for len wrong: expected=2, got=${args.length}`);
+    }
+    const arr = args[0];
+    const elem = args[1];
+    if (arr.objType !== 'ARR') {
+        throw new RuntimeError(`argument type for push wrong: expected=ARR, got=${arr.objType}`);
+    }
+
+    return new Arr([...arr.elements, elem]);
+};
+
 export const builtins: {[name: string]: Builtin} = {
     len: new Builtin(lenFunc),
+    push: new Builtin(pushFunc),
 };

@@ -62,9 +62,9 @@ export class Func {
 
 export class Arr {
     public readonly objType = 'ARR';
-    public elements: Expression[];
+    public elements: Obj[];
 
-    constructor(elements: Expression[]) {
+    constructor(elements: Obj[]) {
         this.elements = elements;
     }
 
@@ -73,7 +73,7 @@ export class Arr {
     }
 
     public inspect(): string {
-        return `[${this.elements.map((e) => e.string()).join(', ')}]`;
+        return `[${this.elements.map((e) => e.inspect()).join(', ')}]`;
     }
 }
 

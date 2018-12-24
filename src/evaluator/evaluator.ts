@@ -1,4 +1,5 @@
 import {
+    ArrLiteral,
     CallExpression,
     Expression,
     IfExpression, IndexExpression,
@@ -71,7 +72,7 @@ export class Evaluator {
             case 'CALL_EXPRESSION':
                 return this.evalCallExpression(node, env);
             case 'ARR_LITERAL':
-                return new Arr(node.elements);
+                return this.evalArrLiteral(node, env);
             case 'INDEX_EXPRESSION':
                 return this.evalIndexExpression(node, env);
         }
@@ -212,11 +213,16 @@ export class Evaluator {
         }
     }
 
+    private evalArrLiteral(arrLiteral: ArrLiteral, env: Environment): Obj {
+        const evaledElements = this.evalExpressions(arrLiteral.elements, env);
+        return new Arr(evaledElements);
+    }
+
     private evalCallExpression(callExp: CallExpression, env: Environment): Obj {
         const { args, func } = callExp;
 
         const evaledFunc = this.eval(func, env);
-        const evaledArgs = this.evalArgs(args, env);
+        const evaledArgs = this.evalExpressions(args, env);
 
         switch (evaledFunc.objType) {
             case 'FUNC':
@@ -236,14 +242,14 @@ export class Evaluator {
         return NIL;
     }
 
-    private evalArgs = (args: Expression[], env: Environment): Obj[] => {
-        const evaledArgs = [];
+    private evalExpressions = (args: Expression[], env: Environment): Obj[] => {
+        const objects: Obj[] = [];
         for (const arg of args) {
-            const evaledArg = this.eval(arg, env);
-            evaledArgs.push(evaledArg);
+            const obj = this.eval(arg, env);
+            objects.push(obj);
         }
 
-        return evaledArgs;
+        return objects;
     }
 
     private getEnvForFuncCall = (func: Func, args: Obj[]): Environment => {
@@ -272,6 +278,6 @@ export class Evaluator {
             throw new RuntimeError(`index ${evaledIndex.inspect()} out of range for ARR ${evaledLeft.inspect()}`);
         }
 
-        return this.eval(evaledLeft.elements[evaledIndex.value], env);
+        return evaledLeft.elements[evaledIndex.value];
     }
 }
