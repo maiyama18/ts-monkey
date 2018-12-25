@@ -7,6 +7,7 @@ import {
 } from '../node/expressions';
 import { Node, Program } from '../node/node';
 import { BlockStatement } from '../node/statements';
+import { Buffer } from '../object/buffer';
 import { Environment } from '../object/environment';
 import { Arr, Bool, Func, Int, Nil, Obj, Str } from '../object/object';
 
@@ -37,19 +38,19 @@ export class Evaluator {
     constructor() {
     }
 
-    public eval(node: Node, env: Environment): Obj {
+    public eval(node: Node, env: Environment, buffer: Buffer): Obj {
         switch (node.nodeType) {
             // statement
             case 'PROGRAM':
-                return this.evalProgram(node, env);
+                return this.evalProgram(node, env, buffer);
             case 'BLOCK_STATEMENT':
-                return this.evalBlockStatement(node, env);
+                return this.evalBlockStatement(node, env, buffer);
             case 'LET_STATEMENT':
-                return env.set(node.identifier.name, this.eval(node.expression, env));
+                return env.set(node.identifier.name, this.eval(node.expression, env, buffer));
             case 'EXPRESSION_STATEMENT':
-                return this.eval(node.expression, env);
+                return this.eval(node.expression, env, buffer);
             case 'RETURN_STATEMENT':
-                throw new ReturnSignal(this.eval(node.expression, env));
+                throw new ReturnSignal(this.eval(node.expression, env, buffer));
 
             // expression
             case 'IDENTIFIER':
@@ -61,25 +62,25 @@ export class Evaluator {
             case 'BOOL_LITERAL':
                 return node.value ? TRUE : FALSE;
             case 'PREFIX_EXPRESSION':
-                return this.evalPrefixExpression(node, env);
+                return this.evalPrefixExpression(node, env, buffer);
             case 'INFIX_EXPRESSION':
-                return this.evalInfixExpression(node, env);
+                return this.evalInfixExpression(node, env, buffer);
             case 'IF_EXPRESSION':
-                return this.evalIfExpression(node, env);
+                return this.evalIfExpression(node, env, buffer);
             case 'FUNC_LITERAL':
-                return new Func(node.parameters, node.body, env);
+                return new Func(node.parameters, node.body, env, buffer);
             case 'CALL_EXPRESSION':
-                return this.evalCallExpression(node, env);
+                return this.evalCallExpression(node, env, buffer);
             case 'ARR_LITERAL':
                 return new Arr(node.elements);
             case 'INDEX_EXPRESSION':
-                return this.evalIndexExpression(node, env);
+                return this.evalIndexExpression(node, env, buffer);
         }
 
         return NIL;
     }
 
-    private evalProgram(program: Program, env: Environment): Obj {
+    private evalProgram(program: Program, env: Environment, buffer: Buffer): Obj {
         const { statements } = program;
 
         let evaluated: Obj = NIL;

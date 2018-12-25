@@ -1,6 +1,7 @@
 import { Evaluator } from './evaluator/evaluator';
 import { Lexer } from './lexer/lexer';
 import { Program } from './node/node';
+import { Buffer } from './object/buffer';
 import { Environment } from './object/environment';
 import { Parser } from './parser/parser';
 import { Token } from './token/token';
@@ -32,9 +33,11 @@ export const evaluate = (input: string): string => {
     const program = parser.parseProgram();
 
     const evaluator = new Evaluator();
+    const buffer = new Buffer();
     const env = new Environment();
 
-    return evaluator.eval(program, env).inspect();
+    evaluator.eval(program, env, buffer);
+    return buffer.toString();
 };
 
 export * from './token/token';
