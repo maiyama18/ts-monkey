@@ -1,5 +1,6 @@
 import { Evaluator, NIL } from '../../src/evaluator/evaluator';
 import { Lexer } from '../../src/lexer/lexer';
+import { Buffer } from '../../src/object/buffer';
 import { Environment } from '../../src/object/environment';
 import { Arr, Bool, Int, Obj, Str } from '../../src/object/object';
 import { Parser } from '../../src/parser/parser';
@@ -515,6 +516,29 @@ add_two(3)
                 expect((rested.elements[0] as Int).value).toBe(2);
             });
         });
+
+        describe('puts', () => {
+            it('should output single object', () => {
+                const input = `puts(1)`;
+                const output = testEvalOutput(input);
+
+                expect(output).toBe(`1\n`);
+            });
+
+            it('should output single evaluated object', () => {
+                const input = `puts(1 + 2)`;
+                const output = testEvalOutput(input);
+
+                expect(output).toBe(`3\n`);
+            });
+
+            it('should output multiple evaluated object', () => {
+                const input = `let a = 5; puts(a); puts(a * a);`;
+                const output = testEvalOutput(input);
+
+                expect(output).toBe(`5\n25\n`);
+            });
+        });
     });
 });
 
@@ -525,6 +549,22 @@ const testEval = (input: string): Obj => {
     const program = parser.parseProgram();
 
     const env = new Environment();
+    const buffer = new Buffer();
     const evaluator = new Evaluator();
-    return evaluator.eval(program, env);
+
+    return evaluator.eval(program, env, buffer);
+};
+
+const testEvalOutput = (input: string): string => {
+    const lexer = new Lexer(input);
+    const parser = new Parser(lexer);
+
+    const program = parser.parseProgram();
+
+    const env = new Environment();
+    const buffer = new Buffer();
+    const evaluator = new Evaluator();
+
+    evaluator.eval(program, env, buffer);
+    return buffer.toString();
 };

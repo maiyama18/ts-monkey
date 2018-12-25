@@ -9,6 +9,10 @@ export class Buffer {
         this.buff += str;
     }
 
+    public empty(): boolean {
+        return this.buff.length === 0;
+    }
+
     public toString(): string {
         return this.buff;
     }

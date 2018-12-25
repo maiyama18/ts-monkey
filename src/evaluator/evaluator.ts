@@ -69,11 +69,11 @@ export class Evaluator {
             case 'IF_EXPRESSION':
                 return this.evalIfExpression(node, env, buffer);
             case 'FUNC_LITERAL':
-                return new Func(node.parameters, node.body, env, buffer);
+                return new Func(node.parameters, node.body, env);
             case 'CALL_EXPRESSION':
                 return this.evalCallExpression(node, env, buffer);
             case 'ARR_LITERAL':
-                return this.evalArrLiteral(node, env);
+                return this.evalArrLiteral(node, env, buffer);
             case 'INDEX_EXPRESSION':
                 return this.evalIndexExpression(node, env, buffer);
         }
@@ -88,7 +88,7 @@ export class Evaluator {
 
         for (const statement of statements) {
             try {
-                evaluated = this.eval(statement, env);
+                evaluated = this.eval(statement, env, buffer);
             } catch (err) {
                 if (err instanceof RuntimeError) {
                     throw err;
@@ -101,20 +101,20 @@ export class Evaluator {
         return evaluated;
     }
 
-    private evalBlockStatement(blockStatement: BlockStatement, env: Environment): Obj {
+    private evalBlockStatement(blockStatement: BlockStatement, env: Environment, buffer: Buffer): Obj {
         const { statements } = blockStatement;
 
         let evaluated: Obj = NIL;
         for (const statement of statements) {
-            evaluated = this.eval(statement, env);
+            evaluated = this.eval(statement, env, buffer);
         }
 
         return evaluated || NIL;
     }
 
-    private evalPrefixExpression(prefixExp: PrefixExpression, env: Environment): Obj {
+    private evalPrefixExpression(prefixExp: PrefixExpression, env: Environment, buffer: Buffer): Obj {
         const { operator, right } = prefixExp;
-        const evaledRight = this.eval(right, env);
+        const evaledRight = this.eval(right, env, buffer);
 
         switch (operator) {
             case '-':
@@ -132,10 +132,10 @@ export class Evaluator {
         return NIL;
     }
 
-    private evalInfixExpression(infixExp: InfixExpression, env: Environment): Obj {
+    private evalInfixExpression(infixExp: InfixExpression, env: Environment, buffer: Buffer): Obj {
         const { operator, left, right } = infixExp;
-        const evaledLeft = this.eval(left, env);
-        const evaledRight = this.eval(right, env);
+        const evaledLeft = this.eval(left, env, buffer);
+        const evaledRight = this.eval(right, env, buffer);
 
         if (evaledLeft.objType !== evaledRight.objType) {
             throw new RuntimeError(`type mismatch: ${evaledLeft.objType} ${operator} ${evaledRight.objType}`);
@@ -200,37 +200,37 @@ export class Evaluator {
         throw new RuntimeError(`invalid operator: ${left.objType} ${operator} ${right.objType}`);
     }
 
-    private evalIfExpression(ifExp: IfExpression, env: Environment): Obj {
+    private evalIfExpression(ifExp: IfExpression, env: Environment, buffer: Buffer): Obj {
         const { condition, consequence, alternative } = ifExp;
-        const evaledCondition = this.eval(condition, env);
+        const evaledCondition = this.eval(condition, env, buffer);
 
         if (evaledCondition === FALSE) {
             if (alternative === undefined) {
                 return NIL;
             }
-            return this.eval(alternative, env);
+            return this.eval(alternative, env, buffer);
         } else {
-            return this.eval(consequence, env);
+            return this.eval(consequence, env, buffer);
         }
     }
 
-    private evalArrLiteral(arrLiteral: ArrLiteral, env: Environment): Obj {
-        const evaledElements = this.evalExpressions(arrLiteral.elements, env);
+    private evalArrLiteral(arrLiteral: ArrLiteral, env: Environment, buffer: Buffer): Obj {
+        const evaledElements = this.evalExpressions(arrLiteral.elements, env, buffer);
         return new Arr(evaledElements);
     }
 
-    private evalCallExpression(callExp: CallExpression, env: Environment): Obj {
+    private evalCallExpression(callExp: CallExpression, env: Environment, buffer: Buffer): Obj {
         const { args, func } = callExp;
 
-        const evaledFunc = this.eval(func, env);
-        const evaledArgs = this.evalExpressions(args, env);
+        const evaledFunc = this.eval(func, env, buffer);
+        const evaledArgs = this.evalExpressions(args, env, buffer);
 
         switch (evaledFunc.objType) {
             case 'FUNC':
                 const extendedEnv = this.getEnvForFuncCall(evaledFunc, evaledArgs);
                 // implemented return using exception throwing
                 try {
-                    return this.eval(evaledFunc.body, extendedEnv);
+                    return this.eval(evaledFunc.body, extendedEnv, buffer);
                 } catch (err) {
                     if (err instanceof ReturnSignal) {
                         return err.obj;
@@ -238,15 +238,15 @@ export class Evaluator {
                 }
                 break;
             case 'BUILTIN':
-                return evaledFunc.func(...evaledArgs);
+                return evaledFunc.func(buffer, ...evaledArgs);
         }
         return NIL;
     }
 
-    private evalExpressions = (args: Expression[], env: Environment): Obj[] => {
+    private evalExpressions = (args: Expression[], env: Environment, buffer: Buffer): Obj[] => {
         const objects: Obj[] = [];
         for (const arg of args) {
-            const obj = this.eval(arg, env);
+            const obj = this.eval(arg, env, buffer);
             objects.push(obj);
         }
 
@@ -263,11 +263,11 @@ export class Evaluator {
         return extendedEnv;
     }
 
-    private evalIndexExpression(indexExp: IndexExpression, env: Environment): Obj {
+    private evalIndexExpression(indexExp: IndexExpression, env: Environment, buffer: Buffer): Obj {
         const { left, index } = indexExp;
 
-        const evaledLeft = this.eval(left, env);
-        const evaledIndex = this.eval(index, env);
+        const evaledLeft = this.eval(left, env, buffer);
+        const evaledIndex = this.eval(index, env, buffer);
 
         if (evaledIndex.objType !== 'INT') {
             throw new RuntimeError(`${evaledIndex.inspect()} is not an INT: got=${evaledIndex.objType}`);

@@ -1,5 +1,6 @@
 import { Expression, Identifier } from '../node/expressions';
 import { BlockStatement } from '../node/statements';
+import { Buffer } from './buffer';
 import { Environment } from './environment';
 
 export type Obj = Int | Str | Bool | Func | Arr | Builtin | Nil;
@@ -77,7 +78,7 @@ export class Arr {
     }
 }
 
-export type BuiltinFunction = (...args: Obj[]) => Obj;
+export type BuiltinFunction = (buffer: Buffer, ...args: Obj[]) => Obj;
 export class Builtin {
     public readonly objType = 'BUILTIN';
     public func: BuiltinFunction;
