@@ -2,7 +2,7 @@ import { Lexer } from '../../src/lexer/lexer';
 import {
     ArrLiteral,
     BoolLiteral, CallExpression,
-    Expression, FuncLiteral, Identifier, IfExpression, IndexExpression,
+    Expression, FuncLiteral, HashLiteral, Identifier, IfExpression, IndexExpression,
     InfixExpression,
     IntLiteral,
     Operator,
@@ -342,6 +342,65 @@ describe('parser', () => {
                 expect(elements.length).toBe(2);
                 testPrefixExpression(elements[0], '-', 1);
                 testInfixExpression(elements[1], 'x', '*', 'y');
+            });
+        });
+
+        describe('hash literal', () => {
+            it('should parse empty hash', () => {
+                const input = `{}`;
+                const { statements } = parseProgram(input);
+
+                expect(statements.length).toBe(1);
+
+                const expressionStatement = statements[0] as ExpressionStatement;
+                const hashLiteral = expressionStatement.expression as HashLiteral;
+
+                expect(hashLiteral.pairs.size).toBe(0);
+            });
+
+            it('should parse hash', () => {
+                const input = `{ "one": 1, "two": 2 }`;
+                const { statements } = parseProgram(input);
+
+                expect(statements.length).toBe(1);
+
+                const expressionStatement = statements[0] as ExpressionStatement;
+                const hashLiteral = expressionStatement.expression as HashLiteral;
+
+                expect(hashLiteral.pairs.size).toBe(2);
+
+                const expectedMap: {[k: string]: number} = { one: 1, two: 2 };
+                for (const [k, v] of hashLiteral.pairs) {
+                    const expected = expectedMap[k.token.literal];
+                    testSingleExpression(v, expected);
+                }
+            });
+
+            it('should parse hash with expression key', () => {
+                const input = `let key = "one"; { key: 1 }`;
+                const { statements } = parseProgram(input);
+
+                expect(statements.length).toBe(2);
+
+                const expressionStatement = statements[1] as ExpressionStatement;
+                const hashLiteral = expressionStatement.expression as HashLiteral;
+
+                expect(hashLiteral.pairs.size).toBe(1);
+                testSingleExpression([...hashLiteral.pairs.keys()][0], 'key');
+                testSingleExpression([...hashLiteral.pairs.values()][0], 1);
+            });
+            it('should parse hash with expression value', () => {
+                const input = `{ "three": 1 + 2 }`;
+                const { statements } = parseProgram(input);
+
+                expect(statements.length).toBe(1);
+
+                const expressionStatement = statements[0] as ExpressionStatement;
+                const hashLiteral = expressionStatement.expression as HashLiteral;
+
+                expect(hashLiteral.pairs.size).toBe(1);
+                testSingleExpression([...hashLiteral.pairs.keys()][0], 'three');
+                testInfixExpression([...hashLiteral.pairs.values()][0], 1, '+', 2);
             });
         });
 

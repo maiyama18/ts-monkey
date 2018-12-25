@@ -11,6 +11,7 @@ export type Expression =
     | IfExpression
     | FuncLiteral
     | CallExpression
+    | HashLiteral
     | ArrLiteral
     | IndexExpression;
 
@@ -163,6 +164,26 @@ export class CallExpression {
 
     public toString(): string {
         return `${this.func.toString()}(${this.args.map((arg) => arg.toString()).join(', ')})`;
+    }
+}
+
+export class HashLiteral {
+    public readonly nodeType = 'HASH_LITERAL';
+    public token = new Token('LBRACKET', '{');
+    public pairs: Map<Expression, Expression>;
+
+    constructor(pairs: Map<Expression, Expression>) {
+        this.pairs = pairs;
+    }
+
+    public toString(): string {
+        let str = '{ ';
+        for (const [k, v] of this.pairs.entries()) {
+            str += `${k}: ${v}`;
+        }
+        str += ' }';
+
+        return str;
     }
 }
 

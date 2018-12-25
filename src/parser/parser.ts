@@ -4,7 +4,7 @@ import {
     BoolLiteral,
     CallExpression,
     Expression,
-    FuncLiteral,
+    FuncLiteral, HashLiteral,
     Identifier,
     IfExpression, IndexExpression,
     InfixExpression,
@@ -79,6 +79,7 @@ export class Parser {
             IF: this.parseIfExpression.bind(this),
             FUNC: this.parseFuncLiteral.bind(this),
             LBRACKET: this.parseArrLiteral.bind(this),
+            LBRACE: this.parseHashLiteral.bind(this),
         };
         this.parseInfixFuncs = {
             EQ: this.parseInfixExpression.bind(this),
@@ -309,6 +310,34 @@ export class Parser {
         const args = this.parseCommaSeparatedExpressions('RPAREN');
 
         return new CallExpression(func, args);
+    }
+
+    private parseHashLiteral(): HashLiteral {
+        if (this.isPeekTokenType('RBRACE')) {
+            this.nextToken();
+            return new HashLiteral(new Map());
+        }
+
+        this.nextToken();
+        const firstKey = this.parseExpression(Precedence.LOWEST);
+        this.expectPeekTokenType('COLON');
+        this.nextToken();
+        const firstValue = this.parseExpression(Precedence.LOWEST);
+        const pairs = new Map().set(firstKey, firstValue);
+
+        while (!this.isPeekTokenType('RBRACE')) {
+            this.expectPeekTokenType('COMMA');
+            this.nextToken();
+
+            const key = this.parseExpression(Precedence.LOWEST);
+            this.expectPeekTokenType('COLON');
+            this.nextToken();
+            const value = this.parseExpression(Precedence.LOWEST);
+            pairs.set(key, value);
+        }
+        this.nextToken();
+
+        return new HashLiteral(pairs);
     }
 
     private parseArrLiteral(): ArrLiteral {
