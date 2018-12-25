@@ -1,8 +1,8 @@
-import { Evaluator, NIL } from '../../src/evaluator/evaluator';
+import { Evaluator, FALSE, NIL, TRUE } from '../../src/evaluator/evaluator';
 import { Lexer } from '../../src/lexer/lexer';
 import { Buffer } from '../../src/object/buffer';
 import { Environment } from '../../src/object/environment';
-import { Arr, Bool, Int, Obj, Str } from '../../src/object/object';
+import { Arr, Bool, HashKey, Int, Obj, Str } from '../../src/object/object';
 import { Parser } from '../../src/parser/parser';
 
 describe('evaluator', () => {
@@ -306,30 +306,64 @@ add_two(3)
         });
 
         describe('index', () => {
-            it('should eval index expression', () => {
-                const input = `["hello", "world"][1];`;
-                const expected = 'world';
+            describe('array', () => {
+                it('should eval index expression', () => {
+                    const input = `["hello", "world"][1];`;
+                    const expected = 'world';
 
-                const actual = testEval(input) as Str;
-                expect(actual.value).toBe(expected);
+                    const actual = testEval(input) as Str;
+                    expect(actual.value).toBe(expected);
+                });
+
+                it('should eval index expression with identifier left', () => {
+                    const input = `let arr = ["hello", "world"]; arr[1];`;
+                    const expected = 'world';
+
+                    const actual = testEval(input) as Str;
+                    expect(actual.value).toBe(expected);
+                });
+
+                it('should throw for out of range index', () => {
+                    const input = `let arr = ["hello", "world"]; arr[3];`;
+                    expect(() => testEval(input)).toThrowError(`out of range`);
+                });
+
+                it('should throw for non int index', () => {
+                    const input = `let arr = ["hello", "world"]; arr["hello"];`;
+                    expect(() => testEval(input)).toThrowError(`not an INT`);
+                });
             });
 
-            it('should eval index expression with identifier left', () => {
-                const input = `let arr = ["hello", "world"]; arr[1];`;
-                const expected = 'world';
+            describe('hash', () => {
+                it('should eval index expression for STR key', () => {
+                    const input = `{"one": 1}["one"];`;
+                    const expected = 1;
 
-                const actual = testEval(input) as Str;
-                expect(actual.value).toBe(expected);
-            });
+                    const actual = testEval(input) as Int;
+                    expect(actual.value).toBe(expected);
+                });
 
-            it('should throw for out of range index', () => {
-                const input = `let arr = ["hello", "world"]; arr[3];`;
-                expect(() => testEval(input)).toThrowError(`out of range`);
-            });
+                it('should eval index expression for INT key', () => {
+                    const input = `{42: "fourtytwo"}[42];`;
+                    const expected = 'fourtytwo';
 
-            it('should throw for non int index', () => {
-                const input = `let arr = ["hello", "world"]; arr["hello"];`;
-                expect(() => testEval(input)).toThrowError(`not an INT`);
+                    const actual = testEval(input) as Str;
+                    expect(actual.value).toBe(expected);
+                });
+
+                it('should eval index expression for BOOL key', () => {
+                    const input = `{true: 1}[true];`;
+                    const expected = 1;
+
+                    const actual = testEval(input) as Int;
+                    expect(actual.value).toBe(expected);
+                });
+
+                it('should return NIL for undefined key', () => {
+                    const input = `{true: 1}[false];`;
+                    const actual = testEval(input);
+                    expect(actual).toBe(NIL);
+                });
             });
         });
     });
@@ -539,6 +573,35 @@ add_two(3)
                 expect(output).toBe(`5\n25\n`);
             });
         });
+    });
+});
+
+describe('hash key', () => {
+    it('should generate the hash keys for INT', () => {
+        const hash42 = new Int(42).hashKey();
+        expect(hash42).toBe('INT-42');
+    });
+
+    it('should generate the hash keys for BOOL', () => {
+        const hashTrue = TRUE.hashKey();
+        expect(hashTrue).toBe('BOOL-true');
+
+        const hashFalse = FALSE.hashKey();
+        expect(hashFalse).toBe('BOOL-false');
+    });
+
+    it('should generate the same hash key for STRs with the same values', () => {
+        const hashHello1 = new Str('hello').hashKey();
+        const hashHello2 = new Str('hello').hashKey();
+
+        expect(hashHello1 === hashHello2).toBe(true);
+    });
+
+    it('should generate different hash keys for STRs with different values', () => {
+        const hashHello = new Str('hello').hashKey();
+        const hashHowdy = new Str('howdy').hashKey();
+
+        expect(hashHello === hashHowdy).toBe(false);
     });
 });
 

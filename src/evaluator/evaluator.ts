@@ -1,7 +1,7 @@
 import {
     ArrLiteral,
     CallExpression,
-    Expression,
+    Expression, HashLiteral,
     IfExpression, IndexExpression,
     InfixExpression,
     PrefixExpression,
@@ -10,7 +10,7 @@ import { Node, Program } from '../node/node';
 import { BlockStatement } from '../node/statements';
 import { Buffer } from '../object/buffer';
 import { Environment } from '../object/environment';
-import { Arr, Bool, Func, Int, Nil, Obj, Str } from '../object/object';
+import { Arr, Bool, Func, Hash, HashKey, HashPair, Int, Nil, Obj, Str } from '../object/object';
 
 export const TRUE = new Bool(true);
 export const FALSE = new Bool(false);
@@ -36,8 +36,7 @@ export class ReturnSignal implements Error {
 }
 
 export class Evaluator {
-    constructor() {
-    }
+    constructor() {}
 
     public eval(node: Node, env: Environment, buffer: Buffer): Obj {
         switch (node.nodeType) {
@@ -75,6 +74,8 @@ export class Evaluator {
                 return this.evalCallExpression(node, env, buffer);
             case 'ARR_LITERAL':
                 return this.evalArrLiteral(node, env, buffer);
+            case 'HASH_LITERAL':
+                return this.evalHashLiteral(node, env, buffer);
             case 'INDEX_EXPRESSION':
                 return this.evalIndexExpression(node, env, buffer);
         }
@@ -220,6 +221,23 @@ export class Evaluator {
         return new Arr(evaledElements);
     }
 
+    private evalHashLiteral(hashLiteral: HashLiteral, env: Environment, buffer: Buffer): Obj {
+        const pairs = new Map<HashKey, HashPair>();
+        for (const [key, value] of hashLiteral.pairs) {
+            const evaledKey = this.eval(key, env, buffer);
+            const evaledValue = this.eval(value, env, buffer);
+
+            if (evaledKey.objType !== 'STR' && evaledKey.objType !== 'INT' && evaledKey.objType !== 'BOOL') {
+                throw new RuntimeError(`type for hash key wrong: ${evaledKey.objType}`);
+            }
+
+            const hashKey = evaledKey.hashKey();
+            pairs.set(hashKey, new HashPair(evaledKey, evaledValue));
+        }
+
+        return new Hash(pairs);
+    }
+
     private evalCallExpression(callExp: CallExpression, env: Environment, buffer: Buffer): Obj {
         const { args, func } = callExp;
 
@@ -270,16 +288,34 @@ export class Evaluator {
         const evaledLeft = this.eval(left, env, buffer);
         const evaledIndex = this.eval(index, env, buffer);
 
-        if (evaledIndex.objType !== 'INT') {
-            throw new RuntimeError(`${evaledIndex.toString()} is not an INT: got=${evaledIndex.objType}`);
+        switch (evaledLeft.objType) {
+            case 'ARR':
+                return this.evalArrIndexExpression(evaledLeft, evaledIndex);
+            case 'HASH':
+                return this.evalHashIndexExpression(evaledLeft, evaledIndex);
+            default:
+                throw new RuntimeError(`${evaledLeft.toString()} is not an ARR nor HASH: got=${evaledLeft.objType}`);
         }
-        if (evaledLeft.objType !== 'ARR') {
-            throw new RuntimeError(`${evaledLeft.toString()} is not an ARR: got=${evaledLeft.objType}`);
+    }
+
+    private evalArrIndexExpression(arr: Arr, index: Obj): Obj {
+        if (index.objType !== 'INT') {
+            throw new RuntimeError(`${index.toString()} is not an INT: got=${index.objType}`);
         }
-        if (!evaledLeft.hasIndex(evaledIndex.value)) {
-            throw new RuntimeError(`index ${evaledIndex.toString()} out of range for ARR ${evaledLeft.toString()}`);
+        if (!arr.hasIndex(index.value)) {
+            throw new RuntimeError(`index ${index.toString()} out of range for ARR ${arr.toString()}`);
         }
 
-        return evaledLeft.elements[evaledIndex.value];
+        return arr.elements[index.value];
+    }
+
+    private evalHashIndexExpression(hash: Hash, index: Obj): Obj {
+        if (index.objType !== 'INT' && index.objType !== 'BOOL' && index.objType !== 'STR') {
+            throw new RuntimeError(`${index.toString()} is not an INT nor BOOL nor STR: got=${index.objType}`);
+        }
+
+        const hashKey = index.hashKey();
+        const pair = hash.pairs.get(hashKey);
+        return pair !== undefined ? pair.value : NIL;
     }
 }
