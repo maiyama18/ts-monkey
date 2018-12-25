@@ -33,7 +33,7 @@ export class LetStatement {
     }
 
     public string(): string {
-        return `let ${this.identifier.string()} = ${this.expression.string()};`;
+        return `let ${this.identifier.toString()} = ${this.expression.toString()};`;
     }
 }
 
@@ -47,7 +47,7 @@ export class ReturnStatement {
     }
 
     public string(): string {
-        return `return ${this.expression.string()}`;
+        return `return ${this.expression.toString()}`;
     }
 }
 
@@ -62,6 +62,6 @@ export class ExpressionStatement {
     }
 
     public string(): string {
-        return this.expression.string();
+        return this.expression.toString();
     }
 }

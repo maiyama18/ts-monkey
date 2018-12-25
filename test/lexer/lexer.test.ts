@@ -78,7 +78,7 @@ let result = add(five, 10);
             });
         });
 
-        it('should tokenize string', () => {
+        it('should tokenize toString', () => {
             const input = `
 "hello";
 "hello world";

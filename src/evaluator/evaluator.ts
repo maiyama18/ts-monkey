@@ -47,7 +47,8 @@ export class Evaluator {
             case 'BLOCK_STATEMENT':
                 return this.evalBlockStatement(node, env, buffer);
             case 'LET_STATEMENT':
-                return env.set(node.identifier.name, this.eval(node.expression, env, buffer));
+                env.set(node.identifier.name, this.eval(node.expression, env, buffer));
+                return NIL;
             case 'EXPRESSION_STATEMENT':
                 return this.eval(node.expression, env, buffer);
             case 'RETURN_STATEMENT':
@@ -243,7 +244,7 @@ export class Evaluator {
         return NIL;
     }
 
-    private evalExpressions = (args: Expression[], env: Environment, buffer: Buffer): Obj[] => {
+    private evalExpressions(args: Expression[], env: Environment, buffer: Buffer): Obj[] {
         const objects: Obj[] = [];
         for (const arg of args) {
             const obj = this.eval(arg, env, buffer);
@@ -253,7 +254,7 @@ export class Evaluator {
         return objects;
     }
 
-    private getEnvForFuncCall = (func: Func, args: Obj[]): Environment => {
+    private getEnvForFuncCall(func: Func, args: Obj[]): Environment {
         const extendedEnv = func.env.extend();
         for (let i = 0; i < args.length; i++) {
             const name = func.parameters[i].name;
@@ -270,13 +271,13 @@ export class Evaluator {
         const evaledIndex = this.eval(index, env, buffer);
 
         if (evaledIndex.objType !== 'INT') {
-            throw new RuntimeError(`${evaledIndex.inspect()} is not an INT: got=${evaledIndex.objType}`);
+            throw new RuntimeError(`${evaledIndex.toString()} is not an INT: got=${evaledIndex.objType}`);
         }
         if (evaledLeft.objType !== 'ARR') {
-            throw new RuntimeError(`${evaledLeft.inspect()} is not an ARR: got=${evaledLeft.objType}`);
+            throw new RuntimeError(`${evaledLeft.toString()} is not an ARR: got=${evaledLeft.objType}`);
         }
         if (!evaledLeft.hasIndex(evaledIndex.value)) {
-            throw new RuntimeError(`index ${evaledIndex.inspect()} out of range for ARR ${evaledLeft.inspect()}`);
+            throw new RuntimeError(`index ${evaledIndex.toString()} out of range for ARR ${evaledLeft.toString()}`);
         }
 
         return evaledLeft.elements[evaledIndex.value];

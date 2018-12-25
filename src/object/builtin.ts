@@ -68,7 +68,7 @@ const restFunc = (buffer: Buffer, ...args: Obj[]): Obj => {
 
 const putsFunc = (buffer: Buffer, ...args: Obj[]): Obj => {
     for (const arg of args) {
-        buffer.write(`${arg.inspect()}\n`);
+        buffer.write(`${arg.toString()}\n`);
     }
 
     return NIL;

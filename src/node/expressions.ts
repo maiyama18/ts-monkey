@@ -29,7 +29,7 @@ export class Identifier {
         this.name = value;
     }
 
-    public string(): string {
+    public toString(): string {
         return this.name;
     }
 }
@@ -44,7 +44,7 @@ export class IntLiteral {
         this.value = value;
     }
 
-    public string(): string {
+    public toString(): string {
         return this.value.toString();
     }
 }
@@ -59,7 +59,7 @@ export class StrLiteral {
         this.value = value;
     }
 
-    public string(): string {
+    public toString(): string {
         return this.value.toString();
     }
 }
@@ -74,7 +74,7 @@ export class BoolLiteral {
         this.value = value;
     }
 
-    public string(): string {
+    public toString(): string {
         return this.value.toString();
     }
 }
@@ -91,8 +91,8 @@ export class PrefixExpression {
         this.right = right;
     }
 
-    public string(): string {
-        return `(${this.operator}${this.right.string()})`;
+    public toString(): string {
+        return `(${this.operator}${this.right.toString()})`;
     }
 }
 
@@ -110,8 +110,8 @@ export class InfixExpression {
         this.right = right;
     }
 
-    public string(): string {
-        return `(${this.left.string()} ${this.operator} ${this.right.string()})`;
+    public toString(): string {
+        return `(${this.left.toString()} ${this.operator} ${this.right.toString()})`;
     }
 }
 
@@ -128,8 +128,8 @@ export class IfExpression {
         this.alternative = alternative;
     }
 
-    public string(): string {
-        const str = `if ${this.condition.string()} ${this.consequence.string()}`;
+    public toString(): string {
+        const str = `if ${this.condition.toString()} ${this.consequence.string()}`;
         return this.alternative === undefined ? str : `${str} else ${this.alternative}`;
     }
 }
@@ -145,8 +145,8 @@ export class FuncLiteral {
         this.body = body;
     }
 
-    public string(): string {
-        return `fn(${this.parameters.map((ident) => ident.string()).join(', ')}) ${this.body.string()}`;
+    public toString(): string {
+        return `fn(${this.parameters.map((ident) => ident.toString()).join(', ')}) ${this.body.string()}`;
     }
 }
 
@@ -161,8 +161,8 @@ export class CallExpression {
         this.args = args;
     }
 
-    public string(): string {
-        return `${this.func.string()}(${this.args.map((arg) => arg.string()).join(', ')})`;
+    public toString(): string {
+        return `${this.func.toString()}(${this.args.map((arg) => arg.toString()).join(', ')})`;
     }
 }
 
@@ -175,8 +175,8 @@ export class ArrLiteral {
         this.elements = elements;
     }
 
-    public string(): string {
-        return `[${this.elements.map((e) => e.string()).join(', ')}]`;
+    public toString(): string {
+        return `[${this.elements.map((e) => e.toString()).join(', ')}]`;
     }
 }
 
@@ -191,7 +191,7 @@ export class IndexExpression {
         this.index = index;
     }
 
-    public string(): string {
+    public toString(): string {
         return `${this.left}[${this.index}]`;
     }
 }

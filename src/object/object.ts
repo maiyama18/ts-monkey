@@ -1,4 +1,4 @@
-import { Expression, Identifier } from '../node/expressions';
+import { Identifier } from '../node/expressions';
 import { BlockStatement } from '../node/statements';
 import { Buffer } from './buffer';
 import { Environment } from './environment';
@@ -13,7 +13,7 @@ export class Int {
         this.value = value;
     }
 
-    public inspect(): string {
+    public toString(): string {
         return this.value.toString();
     }
 }
@@ -26,7 +26,7 @@ export class Str {
         this.value = value;
     }
 
-    public inspect(): string {
+    public toString(): string {
         return this.value;
     }
 }
@@ -39,7 +39,7 @@ export class Bool {
         this.value = value;
     }
 
-    public inspect(): string {
+    public toString(): string {
         return this.value.toString();
     }
 }
@@ -56,7 +56,7 @@ export class Func {
         this.env = env;
     }
 
-    public inspect(): string {
+    public toString(): string {
         return `fn(${this.parameters.map((p) => p.name).join(', ')}) { ${this.body.string()} }`;
     }
 }
@@ -73,8 +73,8 @@ export class Arr {
         return 0 <= index && index < this.elements.length;
     }
 
-    public inspect(): string {
-        return `[${this.elements.map((e) => e.inspect()).join(', ')}]`;
+    public toString(): string {
+        return `[${this.elements.map((e) => e.toString()).join(', ')}]`;
     }
 }
 
@@ -87,7 +87,7 @@ export class Builtin {
         this.func = func;
     }
 
-    public inspect(): string {
+    public toString(): string {
         return `builtin function`;
     }
 }
@@ -98,7 +98,7 @@ export class Nil {
 
     constructor() {}
 
-    public inspect(): string {
-        return `${this.value}`;
+    public toString(): string {
+        return `nil`;
     }
 }

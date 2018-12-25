@@ -9,8 +9,8 @@ export class Program {
         this.statements = statements;
     }
 
-    public string(): string {
-        return this.statements.map((statement) => statement.string()).join('');
+    public toString(): string {
+        return this.statements.map((statement) => statement.toString()).join('');
     }
 }
 
