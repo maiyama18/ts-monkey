@@ -1,7 +1,7 @@
-import { Evaluator } from '../../src/evaluator/evaluator';
+import { Evaluator, NIL } from '../../src/evaluator/evaluator';
 import { Lexer } from '../../src/lexer/lexer';
 import { Environment } from '../../src/object/environment';
-import { Bool, Int, Obj, Str } from '../../src/object/object';
+import { Arr, Bool, Int, Obj, Str } from '../../src/object/object';
 import { Parser } from '../../src/parser/parser';
 
 describe('evaluator', () => {
@@ -410,7 +410,7 @@ add_two(3)
 
     describe('builtin', () => {
         describe('len', () => {
-            it('should count the length of string', () => {
+            it('should count the length of STR', () => {
                 const input = `len("hello world")`;
                 const expected = 11;
 
@@ -418,7 +418,7 @@ add_two(3)
                 expect(actual.value).toBe(expected);
             });
 
-            it('should generate 0 for empty string', () => {
+            it('should generate 0 for empty STR', () => {
                 const input = `len("")`;
                 const expected = 0;
 
@@ -426,9 +426,93 @@ add_two(3)
                 expect(actual.value).toBe(expected);
             });
 
-            it('should throw error for types other than string', () => {
+            it('should count the length of ARR', () => {
+                const input = `len([1, 2, 3, "hello", true])`;
+                const expected = 5;
+
+                const actual = testEval(input) as Int;
+                expect(actual.value).toBe(expected);
+            });
+
+            it('should generate 0 for empty ARR', () => {
+                const input = `len([])`;
+                const expected = 0;
+
+                const actual = testEval(input) as Int;
+                expect(actual.value).toBe(expected);
+            });
+
+            it('should throw error for types other than STR / ARR', () => {
                 const input = `len(true)`;
                 expect(() => testEval(input)).toThrowError(`argument type wrong`);
+            });
+        });
+
+        describe('push', () => {
+            it('should push an element to array', () => {
+                const input = `let arr = push([0,1,2], 3); arr[3]`;
+                const expected = 3;
+
+                const actual = testEval(input) as Int;
+                expect(actual.value).toBe(expected);
+            });
+
+            it('should throw error for wrong number of arguments', () => {
+                const input = `let arr = push([0,1,2])`;
+                expect(() => testEval(input)).toThrowError(`number of arguments`);
+            });
+        });
+
+        describe('first', () => {
+            it('should return the first element of ARR', () => {
+                const input = `first([2, 0, 1])`;
+                const expected = 2;
+
+                const actual = testEval(input) as Int;
+                expect(actual.value).toBe(expected);
+            });
+        });
+
+        describe('last', () => {
+            it('should return the last element of ARR', () => {
+                const input = `last([2, 0, 1])`;
+                const expected = 1;
+
+                const actual = testEval(input) as Int;
+                expect(actual.value).toBe(expected);
+            });
+        });
+
+        describe('rest', () => {
+            it('should return the elements except for the first element of ARR', () => {
+                const input = `rest([0, 1, 2])`;
+
+                const rested = testEval(input) as Arr;
+                expect(rested.elements.length).toBe(2);
+                expect((rested.elements[0] as Int).value).toBe(1);
+                expect((rested.elements[1] as Int).value).toBe(2);
+            });
+
+            it('should return empty Arr for Arr with one element', () => {
+                const input = `rest([0])`;
+
+                const rested = testEval(input) as Arr;
+                expect(rested.elements.length).toBe(0);
+            });
+
+            it('should return empty Nil for empty Arr', () => {
+                const input = `rest([])`;
+
+                const rested = testEval(input);
+                expect(rested).toBe(NIL);
+            });
+
+            it('should work recursively', () => {
+                const input = `rest(rest([0, 1, 2]))`;
+
+                const rested = testEval(input) as Arr;
+                expect(rested.elements.length).toBe(1);
+                expect((rested.elements[0] as Int).value).toBe(2);
             });
         });
     });
