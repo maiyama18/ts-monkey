@@ -1,5 +1,5 @@
 import { NIL, RuntimeError } from '../evaluator/evaluator';
-import { Arr, Builtin, Int, Obj } from './object';
+import { Arr, Builtin, Int, Nil, Obj } from './object';
 
 const lenFunc = (...args: Obj[]): Int => {
     if (args.length !== 1) {
