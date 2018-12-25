@@ -76,6 +76,9 @@ export class Lexer {
             case ';':
                 token = new Token('SEMICOLON', ';');
                 break;
+            case ':':
+                token = new Token('COLON', ':');
+                break;
             case '':
                 token = new Token('EOF', '');
                 break;

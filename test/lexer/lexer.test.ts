@@ -234,5 +234,27 @@ if (5 < 10) {
                 expect(lexer.nextToken()).toEqual(expectedToken);
             });
         });
+
+        it('should tokenize hash', () => {
+            const input = `{ "one": 1, "two": 2 }`;
+            const expectedTokens = [
+                new Token('LBRACE', '{'),
+                new Token('STR', 'one'),
+                new Token('COLON', ':'),
+                new Token('INT', '1'),
+                new Token('COMMA', ','),
+                new Token('STR', 'two'),
+                new Token('COLON', ':'),
+                new Token('INT', '2'),
+                new Token('RBRACE', '}'),
+                new Token('EOF', ''),
+            ];
+
+            const lexer = new Lexer(input);
+
+            expectedTokens.forEach((expectedToken) => {
+                expect(lexer.nextToken()).toEqual(expectedToken);
+            });
+        });
     });
 });
