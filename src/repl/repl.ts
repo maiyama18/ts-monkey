@@ -26,7 +26,7 @@ const repl = () => {
             const obj = evaluator.eval(program, env, buffer);
 
             if (!buffer.empty()) { process.stdout.write(buffer.toString()); }
-            console.log(obj.inspect());
+            console.log(obj.toString());
         } catch (err) {
             console.error(err.message);
         }
